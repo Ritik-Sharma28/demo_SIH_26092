@@ -1,815 +1,671 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SamriddhiSetu — AI Scheme Matching Demo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Hind:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --saffron:#FF9933;
-    --saffron-deep:#FF7A00;
-    --green:#128807;
-    --green-deep:#0d6b06;
-    --navy:#0B2545;
-    --navy2:#123a6b;
-    --blue:#1565C0;
-    --bg:#F2F5FA;
-    --card:#FFFFFF;
-    --ink:#1A2233;
-    --muted:#6B7686;
-    --border:#E4E8F0;
-    --radius:16px;
-    --shadow:0 6px 24px rgba(11,37,69,0.09);
-    --shadow-lg:0 12px 34px rgba(11,37,69,0.14);
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    font-family:'Inter', 'Hind', system-ui, -apple-system, Roboto, sans-serif;
-    background:
-      radial-gradient(1200px 600px at 100% -10%, #eaf2ff 0%, transparent 60%),
-      radial-gradient(900px 500px at -10% 10%, #eefaf0 0%, transparent 55%),
-      var(--bg);
-    color:var(--ink);
-    min-height:100vh;
-  }
-  body.lang-hi{font-family:'Hind','Inter',sans-serif;}
-  .app{max-width:1180px;margin:0 auto;padding:0 20px 70px;}
-
-  /* HEADER */
-  header{
-    background:
-      linear-gradient(120deg, var(--navy) 0%, var(--navy2) 55%, var(--blue) 100%);
-    color:#fff;
-    padding:20px 24px;
-    border-radius:0 0 26px 26px;
-    margin-bottom:30px;
-    box-shadow:var(--shadow-lg);
-    position:relative;
-    overflow:hidden;
-  }
-  header::before{
-    content:"";position:absolute;top:-60%;right:-10%;width:400px;height:400px;border-radius:50%;
-    background:radial-gradient(circle, rgba(255,153,51,0.20), transparent 70%);
-  }
-  header::after{
-    content:"";position:absolute;bottom:-70%;left:5%;width:340px;height:340px;border-radius:50%;
-    background:radial-gradient(circle, rgba(18,136,7,0.18), transparent 70%);
-  }
-  .header-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1;}
-  .brand{display:flex;align-items:center;gap:14px;}
-  .logo{
-    width:50px;height:50px;border-radius:14px;
-    background:linear-gradient(135deg,var(--saffron),var(--green));
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:22px;color:#fff;
-    box-shadow:0 4px 14px rgba(0,0,0,0.28);
-    font-family:'Poppins',sans-serif;
-    flex-shrink:0;
-  }
-  .brand h1{font-size:21px;font-weight:700;letter-spacing:.2px;font-family:'Poppins',sans-serif;}
-  .brand h1 .hindi-name{font-weight:500;font-size:13px;color:#cfe0ff;margin-left:4px;}
-  .brand p{font-size:12.5px;color:#cdd8ea;margin-top:3px;}
-  .badge-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
-  .pill{
-    font-size:11px;padding:6px 12px;border-radius:20px;
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(255,255,255,0.25);
-    color:#e9eefb;font-weight:500;
-    backdrop-filter:blur(4px);
-  }
-  .lang-switch{display:flex;gap:4px;background:rgba(255,255,255,0.12);padding:4px;border-radius:22px;border:1px solid rgba(255,255,255,0.18);}
-  .lang-switch button{
-    border:none;background:transparent;color:#dce6f7;font-size:12.5px;
-    padding:7px 14px;border-radius:18px;cursor:pointer;font-weight:600;
-    transition:.18s;font-family:inherit;
-  }
-  .lang-switch button:hover{color:#fff;}
-  .lang-switch button.active{background:#fff;color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
-
-  /* STEPPER */
-  .stepper{
-    display:flex;gap:10px;justify-content:center;margin:0 auto 30px;
-    max-width:920px;flex-wrap:wrap;
-  }
-  .step-dot{
-    flex:1;min-width:130px;
-    background:var(--card);border:1px solid var(--border);
-    border-radius:14px;padding:12px 14px;text-align:center;
-    font-size:12.5px;font-weight:600;color:var(--muted);
-    cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);
-    position:relative;
-  }
-  .step-dot:hover{border-color:#c9d6ea;transform:translateY(-1px);}
-  .step-dot .num{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:22px;height:22px;border-radius:50%;background:var(--border);
-    color:var(--muted);font-size:11.5px;margin-right:7px;font-weight:700;
-    transition:.22s;
-  }
-  .step-dot.active{border-color:var(--saffron);background:linear-gradient(180deg,#FFF8F0,#FFF3E7);color:var(--navy);box-shadow:var(--shadow);transform:translateY(-2px);}
-  .step-dot.active .num{background:var(--saffron);color:#fff;}
-  .step-dot.done{color:var(--green-deep);border-color:#bfe6bb;}
-  .step-dot.done .num{background:var(--green);color:#fff;}
-
-  section.panel{display:none;}
-  section.panel.active{display:block;animation:fadeIn .4s cubic-bezier(.4,0,.2,1);}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-  .card{
-    background:var(--card);border:1px solid var(--border);
-    border-radius:var(--radius);padding:28px 30px;box-shadow:var(--shadow);
-    margin-bottom:22px;
-  }
-  .card h2{font-size:20px;margin-bottom:5px;color:var(--navy);font-family:'Poppins',sans-serif;font-weight:700;}
-  .card .sub{font-size:13.5px;color:var(--muted);margin-bottom:22px;line-height:1.5;}
-
-  /* VOICE BAR */
-  .voice-bar{
-    display:flex;align-items:center;gap:14px;
-    background:linear-gradient(90deg,#EFF6FF,#F9FCFF);
-    border:1.5px dashed #b7d3f5;
-    border-radius:14px;padding:14px 18px;margin-bottom:24px;
-  }
-  .mic-btn{
-    width:44px;height:44px;border-radius:50%;border:none;
-    background:linear-gradient(135deg,var(--blue),#1e88e5);color:#fff;font-size:18px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 4px 10px rgba(21,101,192,0.4);flex-shrink:0;
-    transition:transform .15s;
-  }
-  .mic-btn:hover{transform:scale(1.07);}
-  .mic-btn.listening{animation:pulse 1s infinite;background:linear-gradient(135deg,#D32F2F,#e53935);}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(211,47,47,.5);}70%{box-shadow:0 0 0 14px rgba(211,47,47,0);}100%{box-shadow:0 0 0 0 rgba(211,47,47,0);}}
-  .voice-text{font-size:13px;color:var(--navy);line-height:1.5;}
-  .voice-text b{color:var(--blue);}
-
-  /* FORM */
-  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
-  @media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
-  .field label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:7px;}
-  .field select, .field input{
-    width:100%;padding:12px 14px;border-radius:11px;border:1.5px solid var(--border);
-    font-size:14px;background:#fbfcfe;color:var(--ink);font-family:inherit;
-    transition:.15s;
-  }
-  .field select:focus, .field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,101,192,0.12);}
-  .btn-row{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;}
-  .btn{
-    padding:13px 26px;border-radius:11px;border:none;font-weight:700;font-size:14px;
-    cursor:pointer;transition:transform .16s, box-shadow .16s;font-family:inherit;
-  }
-  .btn-primary{background:linear-gradient(90deg,var(--saffron),var(--saffron-deep));color:#fff;box-shadow:0 5px 14px rgba(255,122,0,0.35);}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(255,122,0,0.42);}
-  .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--navy);}
-  .btn-outline:hover{border-color:var(--blue);color:var(--blue);background:#F5F9FF;}
-  .btn-green{background:linear-gradient(90deg,var(--green),var(--green-deep));color:#fff;box-shadow:0 5px 14px rgba(18,136,7,0.3);}
-  .btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(18,136,7,0.38);}
-
-  /* RESULT SCHEME CARDS */
-  .scheme-list{display:flex;flex-direction:column;gap:16px;}
-  .scheme-card{
-    border:1.5px solid var(--border);border-radius:14px;padding:20px 22px;
-    display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;
-    transition:.2s; background:#fff;
-  }
-  .scheme-card:hover{box-shadow:var(--shadow);}
-  .scheme-card.best{border-color:var(--green);background:linear-gradient(135deg,#F3FBF1,#FFFFFF);}
-  .scheme-card .left{flex:1;min-width:240px;}
-  .scheme-card h3{font-size:16px;color:var(--navy);margin-bottom:5px;font-weight:700;}
-  .match-tag{
-    display:inline-block;font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:12px;
-    background:linear-gradient(90deg,var(--green),var(--green-deep));color:#fff;margin-left:8px;vertical-align:middle;
-    letter-spacing:.3px;
-  }
-  .scheme-card p{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.55;}
-  .scheme-meta{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
-  .meta-chip{font-size:11.5px;background:#EEF3FA;color:var(--navy);padding:5px 11px;border-radius:8px;font-weight:600;}
-  .score-ring{
-    width:68px;height:68px;border-radius:50%;
-    background:conic-gradient(var(--green) calc(var(--pct,80)*1%), #E7ECF3 0);
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    transition:background 1s ease;
-  }
-  .score-ring span{
-    width:54px;height:54px;border-radius:50%;background:#fff;
-    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13.5px;color:var(--navy);
-  }
-
-  /* CALCULATOR */
-  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;}
-  @media(max-width:800px){.calc-grid{grid-template-columns:1fr;}}
-  .slider-field{margin-bottom:22px;}
-  .slider-field label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:9px;}
-  .slider-field .val{color:var(--blue);font-weight:800;}
-  input[type=range]{width:100%;accent-color:var(--blue);height:6px;cursor:pointer;}
-  .result-box{
-    background:linear-gradient(150deg,var(--navy),var(--navy2) 70%,#1a4a85);color:#fff;border-radius:16px;padding:26px;
-    display:flex;flex-direction:column;gap:14px;justify-content:center;
-    box-shadow:var(--shadow-lg);
-  }
-  .result-row{display:flex;justify-content:space-between;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,0.12);padding-bottom:11px;}
-  .result-row:last-child{border-bottom:none;padding-bottom:0;}
-  .result-row b{font-size:16px;}
-  .emi-big{font-size:36px;font-weight:800;color:var(--saffron);font-family:'Poppins',sans-serif;}
-  .emi-label{font-size:12px;color:#cdd8ea;margin-bottom:3px;}
-  .moratorium-note{font-size:11.5px;background:rgba(255,255,255,0.09);padding:10px 13px;border-radius:10px;color:#dce6f7;line-height:1.5;}
-
-  /* PARTNER LOCATOR */
-  .locator-wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:24px;}
-  @media(max-width:800px){.locator-wrap{grid-template-columns:1fr;}}
-  .map-mock{
-    background:
-      radial-gradient(circle at 30% 30%, #d9e8ff 0, transparent 42%),
-      radial-gradient(circle at 70% 60%, #d3f2df 0, transparent 42%),
-      #EAF1FB;
-    border-radius:16px;border:1px solid var(--border);
-    height:360px;position:relative;overflow:hidden;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);
-  }
-  .map-mock svg{position:absolute;top:0;left:0;width:100%;height:100%;}
-  .map-pin{
-    position:absolute;width:36px;height:36px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;
-    box-shadow:0 4px 10px rgba(0,0,0,0.28);cursor:pointer;transform:translate(-50%,-50%);
-    border:2.5px solid #fff;transition:.18s;
-  }
-  .map-pin:hover{transform:translate(-50%,-50%) scale(1.18);}
-  .map-pin.user{background:linear-gradient(135deg,var(--saffron),var(--saffron-deep));z-index:2;}
-  .map-pin.eligible{background:linear-gradient(135deg,var(--green),var(--green-deep));}
-  .map-pin.flagged{background:#9aa4b2;}
-  .map-legend{position:absolute;bottom:10px;left:10px;display:flex;gap:10px;background:rgba(255,255,255,0.85);padding:6px 10px;border-radius:10px;font-size:10.5px;backdrop-filter:blur(3px);}
-  .map-legend span{display:flex;align-items:center;gap:5px;color:var(--navy);font-weight:600;}
-  .dot-sw{width:9px;height:9px;border-radius:50%;display:inline-block;}
-  .partner-list{display:flex;flex-direction:column;gap:11px;max-height:360px;overflow-y:auto;padding-right:4px;}
-  .partner-card{
-    border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;
-    display:flex;justify-content:space-between;align-items:center;gap:10px;
-    transition:.18s;background:#fff;
-  }
-  .partner-card:not(.flagged):hover{border-color:var(--green);box-shadow:var(--shadow);}
-  .partner-card.flagged{opacity:.55;}
-  .partner-card h4{font-size:13.5px;color:var(--navy);font-weight:700;}
-  .partner-card .type{font-size:11px;color:var(--muted);margin-top:2px;}
-  .status-ok{font-size:11px;font-weight:700;color:var(--green-deep);background:#E7F7E5;padding:4px 10px;border-radius:10px;white-space:nowrap;}
-  .status-flag{font-size:11px;font-weight:700;color:#B23B3B;background:#FBEAEA;padding:4px 10px;border-radius:10px;white-space:nowrap;}
-  .dist{font-size:12px;color:var(--muted);white-space:nowrap;margin-bottom:5px;}
-
-  /* TRACKER */
-  .track-timeline{display:flex;flex-direction:column;gap:0;margin-top:12px;}
-  .track-item{display:flex;gap:18px;position:relative;padding-bottom:30px;}
-  .track-item:last-child{padding-bottom:0;}
-  .track-dot{
-    width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-deep));color:#fff;
-    display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;z-index:1;
-    box-shadow:0 3px 8px rgba(18,136,7,0.3);
-  }
-  .track-item.pending .track-dot{background:var(--border);color:var(--muted);box-shadow:none;}
-  .track-line{position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--border);}
-  .track-item:last-child .track-line{display:none;}
-  .track-item.done .track-line{background:var(--green);}
-  .track-content h4{font-size:14px;color:var(--navy);font-weight:700;}
-  .track-content p{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5;}
-  .track-content .time{font-size:11px;color:#9aa4b2;margin-top:4px;font-weight:600;}
-
-  footer{text-align:center;font-size:11.5px;color:var(--muted);margin-top:22px;line-height:1.6;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SamriddhiSetu - MoSJE AI Scheme Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        hi: ['"Noto Sans Devanagari"', 'sans-serif']
+                    },
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 900: '#14532d' },
+                        saffron: { 50: '#fff7ed', 500: '#f97316', 600: '#ea580c' },
+                        navy: { 800: '#1e293b', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #f4f7f9; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
+        .tab-content { display: none; animation: fadeIn 0.4s ease-out forwards; }
+        .tab-content.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        
+        .listening { animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; background-color: #ef4444 !important; color: white !important; }
+        
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; background: #16a34a; cursor: pointer; margin-top: -8px; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4); transition: transform 0.1s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #cbd5e1; border-radius: 3px; }
+        
+        /* Language Toggle Switch */
+        .lang-toggle { position: relative; width: 80px; height: 34px; background: #1e293b; border-radius: 20px; padding: 2px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border: 1px solid #334155; }
+        .lang-toggle .slider { position: absolute; width: 36px; height: 28px; background: #22c55e; border-radius: 16px; transition: 0.3s; z-index: 1; }
+        .lang-toggle.hi .slider { transform: translateX(40px); }
+        .lang-text { z-index: 2; width: 50%; text-align: center; font-size: 12px; font-weight: 700; color: #fff; pointer-events: none; }
+    </style>
 </head>
-<body>
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <div class="logo">S</div>
-      <div>
-        <h1>SamriddhiSetu <span class="hindi-name">| समृद्धि सेतु</span></h1>
-        <p data-i18n="tagline">AI-Driven Scheme Matching · Ministry of Social Justice &amp; Empowerment (MoSJE)</p>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:9px;">
-      <div class="badge-row">
-        <span class="pill">SIH26092 · Team Invictus</span>
-        <span class="pill" data-i18n="dpdp">🔒 DPDP Act 2023 Compliant</span>
-      </div>
-      <div class="lang-switch">
-        <button class="active" data-lang="en">EN</button>
-        <button data-lang="hi">हिंदी</button>
-      </div>
-    </div>
-  </div>
-</header>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-<div class="app">
+    <!-- Global App State -->
+    <script>
+        const AppState = {
+            lang: 'en',
+            sharedData: {
+                projectCost: 80000,
+                recommendedScheme: null,
+                schemeRate: 6.5,
+                schemeMax: 140000,
+                schemeMora: 3
+            }
+        };
 
-  <div class="stepper">
-    <div class="step-dot active" data-step="1"><span class="num">1</span><span data-i18n="step1">Scheme Recommender</span></div>
-    <div class="step-dot" data-step="2"><span class="num">2</span><span data-i18n="step2">Financial Calculator</span></div>
-    <div class="step-dot" data-step="3"><span class="num">3</span><span data-i18n="step3">Partner Locator</span></div>
-    <div class="step-dot" data-step="4"><span class="num">4</span><span data-i18n="step4">Track Application</span></div>
-  </div>
+        const i18n = {
+            en: {
+                title: "SamriddhiSetu", tagline: "MoSJE AI Channel Finance Portal",
+                tab_reco: "Scheme Matcher", tab_calc: "EMI Calculator", tab_loc: "Partner Locator", tab_track: "Tracker",
+                
+                // Recommender
+                rec_title: "Smart Scheme Recommender", rec_sub: "AI-driven engine to find the exact credit scheme based on your profile.",
+                lbl_purpose: "Project Purpose", opt_micro: "Micro Business (Tailoring, Kirana)", opt_term: "Large Project (Manufacturing)", opt_edu: "Higher Education",
+                lbl_cost: "Estimated Cost (₹)", lbl_income: "Annual Family Income (₹)", lbl_cat: "Category", opt_sc: "Scheduled Caste (SC)", opt_other: "Other",
+                btn_voice: "Tap to Speak (Demo)", btn_find: "Find Eligible Schemes",
+                res_match: "Best Match",
+                scheme_micro: "Micro Finance Scheme", desc_micro: "Up to ₹1.40 Lakh for small business setups.",
+                scheme_term: "Term Loan Scheme", desc_term: "Up to ₹50 Lakh for larger projects (DPR required).",
+                scheme_edu: "Educational Loan", desc_edu: "Up to 90% of course cost.",
+                
+                // Calculator
+                cal_title: "Financial Calculator", cal_sub: "Dynamic EMI, Moratorium, and Interest projection tool.",
+                btn_sync: "Sync from Matcher", sync_msg: "Synced with Micro Finance settings",
+                lbl_loan_amt: "Loan Amount Requested", lbl_tenure: "Repayment Tenure", lbl_mora: "Moratorium Period",
+                lbl_rate: "Interest Rate (p.a.)", txt_months: "Months",
+                res_emi: "Monthly EMI", res_princ: "Principal", res_int: "Total Interest", res_total: "Total Payable",
+                mora_note: "EMI repayment begins after month",
+                
+                // Locator
+                loc_title: "Geo-Spatial Partner Locator", loc_sub: "Find eligible SCAs, PSBs, and RRBs with healthy fund utilization.",
+                lbl_search: "Enter Pincode / District", btn_search: "Search Partners",
+                tag_good: "High Fund Capacity", tag_npa: "High NPA / Excluded",
+                dist: "km away",
+                
+                // Tracker
+                trk_title: "Application Status", trk_sub: "Track your loan disbursement stages offline.",
+                app_id: "App ID: APP-26092", st_rev: "Under Review"
+            },
+            hi: {
+                title: "समृद्धि सेतु", tagline: "MoSJE AI चैनल फाइनेंस पोर्टल",
+                tab_reco: "योजना मिलान", tab_calc: "EMI कैलकुलेटर", tab_loc: "पार्टनर लोकेटर", tab_track: "ट्रैकर",
+                
+                // Recommender
+                rec_title: "स्मार्ट योजना अनुशंसक", rec_sub: "आपकी प्रोफ़ाइल के आधार पर सटीक क्रेडिट योजना खोजने के लिए AI इंजन।",
+                lbl_purpose: "परियोजना का उद्देश्य", opt_micro: "सूक्ष्म व्यवसाय (टेलरिंग, किराना)", opt_term: "बड़ी परियोजना (विनिर्माण)", opt_edu: "उच्च शिक्षा",
+                lbl_cost: "अनुमानित लागत (₹)", lbl_income: "वार्षिक पारिवारिक आय (₹)", lbl_cat: "श्रेणी", opt_sc: "अनुसूचित जाति (SC)", opt_other: "अन्य",
+                btn_voice: "बोलने के लिए टैप करें (डेमो)", btn_find: "पात्र योजनाएं खोजें",
+                res_match: "सर्वश्रेष्ठ मिलान",
+                scheme_micro: "सूक्ष्म वित्त योजना", desc_micro: "छोटे व्यवसायों के लिए ₹1.40 लाख तक।",
+                scheme_term: "सावधि ऋण योजना", desc_term: "बड़े प्रोजेक्ट्स के लिए ₹50 लाख तक।",
+                scheme_edu: "शिक्षा ऋण", desc_edu: "कोर्स लागत का 90% तक।",
+                
+                // Calculator
+                cal_title: "वित्तीय कैलकुलेटर", cal_sub: "डायनामिक EMI, अधिस्थगन, और ब्याज अनुमान उपकरण।",
+                btn_sync: "मिलान से सिंक करें", sync_msg: "सूक्ष्म वित्त सेटिंग्स के साथ सिंक किया गया",
+                lbl_loan_amt: "ऋण राशि", lbl_tenure: "चुकौती अवधि", lbl_mora: "अधिस्थगन अवधि (Moratorium)",
+                lbl_rate: "ब्याज दर (वार्षिक)", txt_months: "महीने",
+                res_emi: "मासिक EMI", res_princ: "मूलधन", res_int: "कुल ब्याज", res_total: "कुल देय राशि",
+                mora_note: "EMI का भुगतान महीने के बाद शुरू होता है:",
+                
+                // Locator
+                loc_title: "जियो-स्पेशियल पार्टनर लोकेटर", loc_sub: "स्वस्थ फंड उपयोग के साथ पात्र SCA, PSB और RRB खोजें।",
+                lbl_search: "पिनकोड / जिला दर्ज करें", btn_search: "पार्टनर खोजें",
+                tag_good: "उच्च फंड क्षमता", tag_npa: "उच्च NPA / बाहर रखा गया",
+                dist: "किमी दूर",
+                
+                // Tracker
+                trk_title: "आवेदन की स्थिति", trk_sub: "अपने ऋण वितरण चरणों को ट्रैक करें।",
+                app_id: "आवेदन ID: APP-26092", st_rev: "समीक्षाधीन"
+            }
+        };
 
-  <!-- STEP 1: SCHEME RECOMMENDER -->
-  <section class="panel active" id="panel-1">
-    <div class="card">
-      <h2 data-i18n="p1_title">Smart Scheme Recommender</h2>
-      <p class="sub" data-i18n="p1_sub">Rule-based AI engine · matches your profile against MoSJE credit &amp; education schemes in seconds</p>
+        function setLanguage(lang) {
+            AppState.lang = lang;
+            document.body.classList.toggle('font-hi', lang === 'hi');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    if (el.tagName === 'INPUT' && el.type === 'button') el.value = i18n[lang][key];
+                    else el.innerHTML = i18n[lang][key];
+                }
+            });
+            const toggle = document.getElementById('langToggle');
+            if (lang === 'hi') toggle.classList.add('hi');
+            else toggle.classList.remove('hi');
+            
+            updateCalcUI(); // Refresh dynamic calculator strings
+        }
 
-      <div class="voice-bar">
-        <button class="mic-btn" id="micBtn" title="Try voice input">🎤</button>
-        <div class="voice-text" id="voiceText" data-i18n="voice_hint">Try it: <b>"मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए"</b> → auto-fills the form below (demo)</div>
-      </div>
+        function toggleLang() {
+            setLanguage(AppState.lang === 'en' ? 'hi' : 'en');
+        }
+    </script>
 
-      <div class="form-grid" id="recoForm">
-        <div class="field">
-          <label data-i18n="lbl_project">Project / Purpose Type</label>
-          <select id="projectType">
-            <option value="micro" data-i18n="opt_micro">Micro Business (tailoring, kirana, handicraft)</option>
-            <option value="term" data-i18n="opt_term">Larger Project (workshop, transport, manufacturing)</option>
-            <option value="education" data-i18n="opt_edu">Higher Education (India / Abroad)</option>
-          </select>
+    <!-- Header -->
+    <header class="bg-navy-900 text-white sticky top-0 z-50 shadow-lg border-b-4 border-brand-500">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-saffron-500 to-brand-500 flex items-center justify-center font-bold text-2xl shadow-inner border border-white/20">S</div>
+                <div>
+                    <h1 class="font-bold text-xl leading-tight tracking-tight" data-i18n="title">SamriddhiSetu</h1>
+                    <p class="text-xs text-slate-300 font-medium" data-i18n="tagline">MoSJE AI Channel Finance Portal</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <span class="hidden md:inline-flex bg-slate-800 text-xs text-brand-400 px-3 py-1 rounded-full border border-slate-700 font-bold tracking-wide">SIH26092</span>
+                <!-- Custom Lang Toggle -->
+                <div id="langToggle" class="lang-toggle" onclick="toggleLang()">
+                    <div class="slider shadow-sm"></div>
+                    <div class="lang-text">EN</div>
+                    <div class="lang-text">HI</div>
+                </div>
+            </div>
         </div>
-        <div class="field">
-          <label data-i18n="lbl_cost">Estimated Project / Course Cost (₹)</label>
-          <input type="number" id="cost" value="80000" min="1000" step="1000">
+
+        <!-- Main Tab Navigation -->
+        <div class="bg-slate-800 border-t border-slate-700 overflow-x-auto no-scrollbar">
+            <div class="max-w-7xl mx-auto px-4 flex min-w-max">
+                <button onclick="switchTab('recommender')" id="nav-recommender" class="tab-btn px-6 py-4 text-sm font-bold text-white border-b-2 border-brand-500 bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-wand-magic-sparkles text-brand-400"></i> <span data-i18n="tab_reco">Scheme Matcher</span>
+                </button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-6 py-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2">
+                    <i class="fas fa-calculator text-saffron-400"></i> <span data-i18n="tab_calc">EMI Calculator</span>
+                </button>
+                <button onclick="switchTab('locator')" id="nav-locator" class="tab-btn px-6 py-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2">
+                    <i class="fas fa-map-location-dot text-blue-400"></i> <span data-i18n="tab_loc">Partner Locator</span>
+                </button>
+                <button onclick="switchTab('tracker')" id="nav-tracker" class="tab-btn px-6 py-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2">
+                    <i class="fas fa-list-check text-purple-400"></i> <span data-i18n="tab_track">Tracker</span>
+                </button>
+            </div>
         </div>
-        <div class="field">
-          <label data-i18n="lbl_income">Annual Family Income (₹)</label>
-          <input type="number" id="income" value="180000" min="0" step="1000">
-        </div>
-        <div class="field">
-          <label data-i18n="lbl_category">Applicant Category</label>
-          <select id="category">
-            <option value="sc" data-i18n="opt_sc">Scheduled Caste (SC)</option>
-            <option value="general" data-i18n="opt_gen">General / Other</option>
-          </select>
-        </div>
-      </div>
+    </header>
 
-      <div class="btn-row">
-        <button class="btn btn-primary" id="runReco" data-i18n="btn_reco">✦ Get AI Recommendation</button>
-        <button class="btn btn-outline" onclick="resetForm()" data-i18n="btn_reset">Reset</button>
-      </div>
-    </div>
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 relative">
 
-    <div class="card" id="resultCard" style="display:none;">
-      <h2 data-i18n="p1r_title">Recommended Schemes</h2>
-      <p class="sub" data-i18n="p1r_sub">Ranked by eligibility fit — based on cost slab, income ceiling &amp; purpose</p>
-      <div class="scheme-list" id="schemeList"></div>
-      <div class="btn-row">
-        <button class="btn btn-green" id="toCalc" data-i18n="btn_tocalc">Proceed to Financial Calculator →</button>
-      </div>
-    </div>
-  </section>
+        <!-- ================= TAB 1: SCHEME RECOMMENDER ================= -->
+        <section id="tab-recommender" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Input Panel -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-panel rounded-2xl p-6">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-navy-900" data-i18n="rec_title">Smart Scheme Recommender</h2>
+                            <p class="text-slate-500 text-sm mt-1" data-i18n="rec_sub">AI-driven engine to find the exact credit scheme based on your profile.</p>
+                        </div>
 
-  <!-- STEP 2: FINANCIAL CALCULATOR -->
-  <section class="panel" id="panel-2">
-    <div class="card">
-      <h2 data-i18n="p2_title">Financial Calculator</h2>
-      <p class="sub"><span data-i18n="p2_sub_a">Live EMI projection for</span> <b id="selSchemeName">Micro Finance Scheme</b> · <span data-i18n="p2_sub_b">adjust the sliders</span></p>
-      <div class="calc-grid">
-        <div>
-          <div class="slider-field">
-            <label><span data-i18n="lbl_loanamt">Loan Amount</span> <span class="val" id="loanAmtVal">₹80,000</span></label>
-            <input type="range" id="loanAmt" min="10000" max="1400000" step="5000" value="80000">
-          </div>
-          <div class="slider-field">
-            <label><span data-i18n="lbl_rate">Interest Rate (p.a.)</span> <span class="val" id="rateVal">6.5%</span></label>
-            <input type="range" id="rate" min="6.5" max="15" step="0.1" value="6.5">
-          </div>
-          <div class="slider-field">
-            <label><span data-i18n="lbl_tenure">Tenure</span> <span class="val" id="tenureVal">36 <span data-i18n="unit_months">months</span></span></label>
-            <input type="range" id="tenure" min="12" max="120" step="6" value="36">
-          </div>
-          <div class="slider-field">
-            <label><span data-i18n="lbl_mora">Moratorium Period</span> <span class="val" id="moraVal">3 <span data-i18n="unit_months">months</span></span></label>
-            <input type="range" id="mora" min="3" max="12" step="1" value="3">
-          </div>
-        </div>
-        <div class="result-box">
-          <div>
-            <div class="emi-label" data-i18n="lbl_emi">Estimated Monthly EMI</div>
-            <div class="emi-big" id="emiOut">₹2,451</div>
-          </div>
-          <div class="result-row"><span data-i18n="lbl_principal">Principal</span><b id="rPrincipal">₹80,000</b></div>
-          <div class="result-row"><span data-i18n="lbl_interest">Total Interest Payable</span><b id="rInterest">₹8,236</b></div>
-          <div class="result-row"><span data-i18n="lbl_total">Total Repayment</span><b id="rTotal">₹88,236</b></div>
-          <div class="moratorium-note" id="moraNote">📌 No EMI charged during the 3-month moratorium — repayment begins from month 4.</div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="goStep(1)" data-i18n="btn_back">← Back</button>
-        <button class="btn btn-green" onclick="goStep(3)" data-i18n="btn_findpartners">Find Channel Partners →</button>
-      </div>
-    </div>
-  </section>
+                        <!-- Voice Mock -->
+                        <div class="bg-brand-50 border border-brand-200 rounded-xl p-4 mb-6 flex flex-col items-center justify-center text-center">
+                            <button id="btn-voice" onclick="mockVoiceInput()" class="bg-white text-slate-700 border border-slate-300 shadow-sm rounded-full px-6 py-2.5 font-bold text-sm flex items-center gap-2 hover:border-brand-500 transition-all">
+                                <i class="fas fa-microphone text-brand-600"></i> <span data-i18n="btn_voice">Tap to Speak (Demo)</span>
+                            </button>
+                            <p class="text-xs text-slate-500 mt-3 font-medium">"मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए"</p>
+                        </div>
 
-  <!-- STEP 3: GEO PARTNER LOCATOR -->
-  <section class="panel" id="panel-3">
-    <div class="card">
-      <h2 data-i18n="p3_title">Geo-Spatial Partner Locator &amp; Router</h2>
-      <p class="sub" data-i18n="p3_sub">Nearest eligible Channel Partners — auto-filtered by current fund utilization &amp; NPA health</p>
-      <div class="locator-wrap">
-        <div class="map-mock" id="mapMock">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="M0,60 Q25,40 50,55 T100,45" stroke="#c7d7ee" stroke-width="1" fill="none"/>
-            <path d="M0,80 Q40,70 60,85 T100,75" stroke="#c7d7ee" stroke-width="1" fill="none"/>
-          </svg>
-          <div class="map-pin user" style="top:50%;left:50%;" title="You">📍</div>
-          <div class="map-pin eligible" style="top:30%;left:30%;" title="Lucknow RRB">🏦</div>
-          <div class="map-pin eligible" style="top:65%;left:35%;" title="SCA Kanpur Rd">🏛</div>
-          <div class="map-pin eligible" style="top:35%;left:70%;" title="NBFC-MFI Gomti">🏢</div>
-          <div class="map-pin flagged" style="top:70%;left:68%;" title="High NPA — flagged">⛔</div>
-          <div class="map-legend">
-            <span><span class="dot-sw" style="background:var(--saffron);"></span><span data-i18n="legend_you">You</span></span>
-            <span><span class="dot-sw" style="background:var(--green);"></span><span data-i18n="legend_eligible">Eligible</span></span>
-            <span><span class="dot-sw" style="background:#9aa4b2;"></span><span data-i18n="legend_flagged">Flagged</span></span>
-          </div>
-        </div>
-        <div class="partner-list" id="partnerList"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="goStep(2)" data-i18n="btn_back">← Back</button>
-        <button class="btn btn-green" onclick="submitApplication()" data-i18n="btn_route">Route Application to Selected Partner →</button>
-      </div>
-    </div>
-  </section>
+                        <!-- Form -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_purpose">Project Purpose</label>
+                                <select id="inp-purpose" class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                    <option value="micro" data-i18n="opt_micro">Micro Business (Tailoring, Kirana)</option>
+                                    <option value="term" data-i18n="opt_term">Large Project (Manufacturing)</option>
+                                    <option value="edu" data-i18n="opt_edu">Higher Education</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_cost">Estimated Cost (₹)</label>
+                                <input type="number" id="inp-cost" placeholder="50000" class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_income">Annual Income (₹)</label>
+                                    <input type="number" value="180000" class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_cat">Category</label>
+                                    <select class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                        <option data-i18n="opt_sc">SC</option>
+                                        <option data-i18n="opt_other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button onclick="runRuleEngine()" class="w-full bg-navy-900 hover:bg-black text-white font-bold py-3.5 rounded-xl shadow-lg mt-4 transition-all">
+                                <span data-i18n="btn_find">Find Eligible Schemes</span> <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-  <!-- STEP 4: TRACKING -->
-  <section class="panel" id="panel-4">
-    <div class="card">
-      <h2 data-i18n="p4_title">Application Tracking</h2>
-      <p class="sub"><span data-i18n="p4_sub_a">Real-time status · Application ID</span> <b id="appId">SST-2026-88213</b></p>
-      <div class="track-timeline" id="trackTimeline"></div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="goStep(3)" data-i18n="btn_back">← Back</button>
-        <button class="btn btn-primary" onclick="goStep(1)" data-i18n="btn_newapp">Start a New Application</button>
-      </div>
-    </div>
-  </section>
+                <!-- Right Results Panel -->
+                <div class="lg:col-span-7">
+                    <div id="reco-results" class="hidden space-y-4">
+                        <!-- Primary Match -->
+                        <div class="glass-panel rounded-2xl p-6 border-l-4 border-l-brand-500 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-brand-100 text-brand-700 text-xs font-bold px-3 py-1 rounded-bl-lg" data-i18n="res_match">Best Match</div>
+                            <h3 id="res-title-1" class="text-xl font-bold text-navy-900" data-i18n="scheme_micro">Micro Finance Scheme</h3>
+                            <p id="res-desc-1" class="text-slate-500 text-sm mt-1 mb-4" data-i18n="desc_micro">Up to ₹1.40 Lakh for small business setups.</p>
+                            
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200"><i class="fas fa-percent text-brand-500 mr-1"></i> <span id="res-rate">6.5%</span> p.a.</span>
+                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200"><i class="fas fa-calendar-alt text-brand-500 mr-1"></i> Max 5 Yrs</span>
+                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200"><i class="fas fa-pause-circle text-brand-500 mr-1"></i> 3m Moratorium</span>
+                            </div>
+                            
+                            <div class="flex gap-3">
+                                <button onclick="selectSchemeAndJump('calculator')" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-lg transition-colors text-sm shadow-md">
+                                    <i class="fas fa-calculator mr-1"></i> Calculate EMI
+                                </button>
+                                <button onclick="selectSchemeAndJump('locator')" class="flex-1 bg-white border border-brand-500 text-brand-700 hover:bg-brand-50 font-bold py-2.5 rounded-lg transition-colors text-sm">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> Find Channel Partner
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Secondary Option -->
+                        <div class="glass-panel rounded-2xl p-6 opacity-75 grayscale hover:grayscale-0 transition-all border border-slate-200">
+                            <h3 class="text-lg font-bold text-slate-700" data-i18n="scheme_term">Term Loan Scheme</h3>
+                            <p class="text-slate-500 text-sm mt-1" data-i18n="desc_term">Up to ₹50 Lakh for larger projects (DPR required).</p>
+                        </div>
+                    </div>
+                    
+                    <div id="reco-empty" class="h-full min-h-[400px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                        <i class="fas fa-clipboard-list text-4xl mb-3"></i>
+                        <p class="font-medium">Fill details to see matched schemes</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  <footer data-i18n="footer_note">Mock demo prototype for SIH 2026 · PS 26092 · This is a simulated, offline demonstration — no real data or backend calls are made.</footer>
-</div>
 
-<script>
-/* ================= I18N ================= */
-const I18N = {
-  en: {
-    tagline:'AI-Driven Scheme Matching · Ministry of Social Justice &amp; Empowerment (MoSJE)',
-    dpdp:'🔒 DPDP Act 2023 Compliant',
-    step1:'Scheme Recommender', step2:'Financial Calculator', step3:'Partner Locator', step4:'Track Application',
-    p1_title:'Smart Scheme Recommender',
-    p1_sub:'Rule-based AI engine · matches your profile against MoSJE credit &amp; education schemes in seconds',
-    voice_hint:'Try it: <b>"मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए"</b> → auto-fills the form below (demo)',
-    lbl_project:'Project / Purpose Type', lbl_cost:'Estimated Project / Course Cost (₹)',
-    lbl_income:'Annual Family Income (₹)', lbl_category:'Applicant Category',
-    opt_micro:'Micro Business (tailoring, kirana, handicraft)',
-    opt_term:'Larger Project (workshop, transport, manufacturing)',
-    opt_edu:'Higher Education (India / Abroad)',
-    opt_sc:'Scheduled Caste (SC)', opt_gen:'General / Other',
-    btn_reco:'✦ Get AI Recommendation', btn_reset:'Reset',
-    p1r_title:'Recommended Schemes',
-    p1r_sub:'Ranked by eligibility fit — based on cost slab, income ceiling &amp; purpose',
-    btn_tocalc:'Proceed to Financial Calculator →',
-    p2_title:'Financial Calculator',
-    p2_sub_a:'Live EMI projection for', p2_sub_b:'adjust the sliders',
-    lbl_loanamt:'Loan Amount', lbl_rate:'Interest Rate (p.a.)', lbl_tenure:'Tenure', lbl_mora:'Moratorium Period',
-    unit_months:'months',
-    lbl_emi:'Estimated Monthly EMI', lbl_principal:'Principal',
-    lbl_interest:'Total Interest Payable', lbl_total:'Total Repayment',
-    btn_back:'← Back', btn_findpartners:'Find Channel Partners →',
-    p3_title:'Geo-Spatial Partner Locator &amp; Router',
-    p3_sub:'Nearest eligible Channel Partners — auto-filtered by current fund utilization &amp; NPA health',
-    legend_you:'You', legend_eligible:'Eligible', legend_flagged:'Flagged',
-    btn_route:'Route Application to Selected Partner →',
-    p4_title:'Application Tracking',
-    p4_sub_a:'Real-time status · Application ID',
-    btn_newapp:'Start a New Application',
-    footer_note:'Mock demo prototype for SIH 2026 · PS 26092 · This is a simulated, offline demonstration — no real data or backend calls are made.',
-    mora_note_tpl:(m)=>`📌 No EMI charged during the ${m}-month moratorium — repayment begins from month ${m+1}.`,
-    scheme_names:{micro:'Micro Finance Scheme', term:'Term Loan Scheme', education:'Educational Loan Scheme'},
-    scheme_desc:{
-      micro:'For small business / self-employment projects such as tailoring shops, kirana stores, handicraft units.',
-      term:'For larger projects — workshops, transport vehicles, manufacturing setups, and expansion of existing units.',
-      education:'Covers tuition, hostel &amp; related expenses for higher education in India or abroad, up to 90% of cost.'
-    },
-    best_match:'BEST MATCH', chip_max:'Max', chip_rate:'Rate', chip_mora:'Moratorium', chip_tenure:'Tenure',
-    btn_select:'Select',
-    partner_names:{
-      p1:'Lucknow Regional Rural Bank', p2:'UP SC/ST Corp SCA — Kanpur Rd Branch',
-      p3:'Gomti NBFC-MFI Center', p4:'Alambagh PSB Branch'
-    },
-    partner_types:{p1:'RRB · Channel Partner', p2:'State Channelizing Agency', p3:'NBFC-MFI', p4:'Public Sector Bank'},
-    partner_util:{p1:'82% fund utilization', p2:'91% fund utilization', p3:'76% fund utilization', p4:'High NPA — funds paused'},
-    status_ok:'✓ Eligible', status_flag:'⛔ NPA Flag',
-    track_submitted_title:'Application Submitted', track_submitted_desc:(p)=>`Routed to ${p} via SamriddhiSetu`,
-    track_verified_title:'Scheme & Eligibility Verified', track_verified_desc:(s)=>`${s} — auto-matched by AI engine`,
-    track_doc_title:'Document Verification', track_doc_desc:'Channel Partner reviewing KYC & income proof',
-    track_disb_title:'Sanction & Disbursement', track_disb_desc:'DBT credit to registered bank account',
-    time_now:'Just now', time_2days:'Expected in 2 days', time_pending:'Pending',
-    voice_recognized:'✅ Recognized: <b>Tailoring shop, ₹80,000</b> — form auto-filled via Bhashini ASR + NLP intent parsing.'
-  },
-  hi: {
-    tagline:'AI-आधारित योजना मिलान · सामाजिक न्याय और अधिकारिता मंत्रालय (MoSJE)',
-    dpdp:'🔒 DPDP अधिनियम 2023 अनुरूप',
-    step1:'योजना अनुशंसक', step2:'वित्तीय कैलकुलेटर', step3:'पार्टनर लोकेटर', step4:'आवेदन ट्रैक करें',
-    p1_title:'स्मार्ट योजना अनुशंसक',
-    p1_sub:'नियम-आधारित AI इंजन · कुछ ही सेकंड में आपकी प्रोफ़ाइल को MoSJE की क्रेडिट व शिक्षा योजनाओं से मिलाता है',
-    voice_hint:'आज़माएं: <b>"मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए"</b> → नीचे फ़ॉर्म स्वतः भर जाएगा (डेमो)',
-    lbl_project:'परियोजना / उद्देश्य का प्रकार', lbl_cost:'अनुमानित परियोजना / कोर्स लागत (₹)',
-    lbl_income:'वार्षिक परिवारिक आय (₹)', lbl_category:'आवेदक श्रेणी',
-    opt_micro:'सूक्ष्म व्यवसाय (टेलरिंग, किराना, हस्तशिल्प)',
-    opt_term:'बड़ी परियोजना (वर्कशॉप, परिवहन, निर्माण)',
-    opt_edu:'उच्च शिक्षा (भारत / विदेश)',
-    opt_sc:'अनुसूचित जाति (SC)', opt_gen:'सामान्य / अन्य',
-    btn_reco:'✦ AI अनुशंसा प्राप्त करें', btn_reset:'रीसेट करें',
-    p1r_title:'अनुशंसित योजनाएं',
-    p1r_sub:'पात्रता के अनुसार क्रमबद्ध — लागत स्लैब, आय सीमा व उद्देश्य के आधार पर',
-    btn_tocalc:'वित्तीय कैलकुलेटर पर जाएं →',
-    p2_title:'वित्तीय कैलकुलेटर',
-    p2_sub_a:'के लिए लाइव EMI अनुमान', p2_sub_b:'स्लाइडर समायोजित करें',
-    lbl_loanamt:'ऋण राशि', lbl_rate:'ब्याज दर (वार्षिक)', lbl_tenure:'अवधि', lbl_mora:'अधिस्थगन अवधि',
-    unit_months:'महीने',
-    lbl_emi:'अनुमानित मासिक EMI', lbl_principal:'मूल राशि',
-    lbl_interest:'कुल देय ब्याज', lbl_total:'कुल भुगतान',
-    btn_back:'← पीछे', btn_findpartners:'चैनल पार्टनर खोजें →',
-    p3_title:'जियो-स्पेशियल पार्टनर लोकेटर व राउटर',
-    p3_sub:'निकटतम पात्र चैनल पार्टनर — वर्तमान फंड उपयोग व NPA स्थिति के आधार पर स्वतः फ़िल्टर',
-    legend_you:'आप', legend_eligible:'पात्र', legend_flagged:'फ़्लैग किया गया',
-    btn_route:'चयनित पार्टनर को आवेदन भेजें →',
-    p4_title:'आवेदन ट्रैकिंग',
-    p4_sub_a:'रीयल-टाइम स्थिति · आवेदन ID',
-    btn_newapp:'नया आवेदन शुरू करें',
-    footer_note:'SIH 2026 के लिए मॉक डेमो प्रोटोटाइप · PS 26092 · यह एक सिम्युलेटेड, ऑफ़लाइन प्रदर्शन है — कोई वास्तविक डेटा या बैकएंड कॉल नहीं की जाती।',
-    mora_note_tpl:(m)=>`📌 ${m}-महीने के अधिस्थगन के दौरान कोई EMI नहीं ली जाएगी — भुगतान महीने ${m+1} से शुरू होगा।`,
-    scheme_names:{micro:'सूक्ष्म वित्त योजना', term:'टर्म लोन योजना', education:'शिक्षा ऋण योजना'},
-    scheme_desc:{
-      micro:'छोटे व्यवसाय / स्वरोज़गार परियोजनाओं के लिए जैसे टेलरिंग की दुकानें, किराना स्टोर, हस्तशिल्प इकाइयां।',
-      term:'बड़ी परियोजनाओं के लिए — वर्कशॉप, परिवहन वाहन, निर्माण इकाइयां, और मौजूदा इकाइयों का विस्तार।',
-      education:'भारत या विदेश में उच्च शिक्षा के लिए ट्यूशन, हॉस्टल व संबंधित खर्च, लागत का 90% तक कवर करता है।'
-    },
-    best_match:'सर्वश्रेष्ठ मिलान', chip_max:'अधिकतम', chip_rate:'दर', chip_mora:'अधिस्थगन', chip_tenure:'अवधि',
-    btn_select:'चुनें',
-    partner_names:{
-      p1:'लखनऊ क्षेत्रीय ग्रामीण बैंक', p2:'यूपी SC/ST कॉर्प SCA — कानपुर रोड शाखा',
-      p3:'गोमती NBFC-MFI केंद्र', p4:'आलमबाग PSB शाखा'
-    },
-    partner_types:{p1:'RRB · चैनल पार्टनर', p2:'राज्य चैनलाइज़िंग एजेंसी', p3:'NBFC-MFI', p4:'सार्वजनिक क्षेत्र बैंक'},
-    partner_util:{p1:'82% फंड उपयोग', p2:'91% फंड उपयोग', p3:'76% फंड उपयोग', p4:'उच्च NPA — फंड रुका हुआ'},
-    status_ok:'✓ पात्र', status_flag:'⛔ NPA फ़्लैग',
-    track_submitted_title:'आवेदन जमा हुआ', track_submitted_desc:(p)=>`SamriddhiSetu के माध्यम से ${p} को भेजा गया`,
-    track_verified_title:'योजना और पात्रता सत्यापित', track_verified_desc:(s)=>`${s} — AI इंजन द्वारा स्वतः मिलान किया गया`,
-    track_doc_title:'दस्तावेज़ सत्यापन', track_doc_desc:'चैनल पार्टनर KYC व आय प्रमाण की जांच कर रहा है',
-    track_disb_title:'मंज़ूरी व संवितरण', track_disb_desc:'पंजीकृत बैंक खाते में DBT क्रेडिट',
-    time_now:'अभी', time_2days:'2 दिनों में अनुमानित', time_pending:'लंबित',
-    voice_recognized:'✅ पहचाना गया: <b>टेलरिंग की दुकान, ₹80,000</b> — Bhashini ASR + NLP से फ़ॉर्म स्वतः भरा गया।'
-  }
-};
-let currentLang = 'en';
+        <!-- ================= TAB 2: FINANCIAL CALCULATOR ================= -->
+        <section id="tab-calculator" class="tab-content">
+            <div class="glass-panel rounded-3xl overflow-hidden shadow-lg border border-white max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    
+                    <!-- Controls -->
+                    <div class="p-8 bg-white">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-navy-900" data-i18n="cal_title">Financial Calculator</h2>
+                                <p class="text-sm text-slate-500" data-i18n="cal_sub">Dynamic EMI, Moratorium, and Interest projection.</p>
+                            </div>
+                            <button id="btn-sync" onclick="syncFromRecommender()" class="hidden bg-saffron-50 text-saffron-600 border border-saffron-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-saffron-100 transition flex items-center gap-1">
+                                <i class="fas fa-rotate"></i> <span data-i18n="btn_sync">Sync from Matcher</span>
+                            </button>
+                        </div>
+                        
+                        <div id="sync-msg" class="hidden mb-6 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-2 rounded-lg border border-brand-200 flex items-center gap-2">
+                            <i class="fas fa-check-circle"></i> <span data-i18n="sync_msg">Synced with Micro Finance settings</span>
+                        </div>
 
-/* ---------------- DATA ---------------- */
-const SCHEME_DEFS = [
-  { id:'micro', minCost:0, maxCost:140000, rateNum:6.5, max:'₹1.40 Lakh', moraM:3, tenureTxt:{en:'up to 5 yrs',hi:'5 वर्ष तक'} },
-  { id:'term', minCost:140001, maxCost:5000000, rateNum:8, max:'₹50.00 Lakh', moraM:6, tenureTxt:{en:'up to 10 yrs',hi:'10 वर्ष तक'} },
-  { id:'education', minCost:0, maxCost:3000000, rateNum:7, max:{en:'Course-dependent',hi:'कोर्स पर निर्भर'}, moraM:12, tenureTxt:{en:'up to 15 yrs',hi:'15 वर्ष तक'} }
-];
-const PARTNER_KEYS = [
-  {key:'p1', dist:'1.2 km', status:'ok'},
-  {key:'p2', dist:'2.8 km', status:'ok'},
-  {key:'p3', dist:'3.5 km', status:'ok'},
-  {key:'p4', dist:'4.6 km', status:'flag'}
-];
+                        <div class="space-y-8">
+                            <!-- Loan Amount -->
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_loan_amt">Loan Amount</label>
+                                    <span class="font-bold text-brand-600 text-lg" id="val-loan">₹80,000</span>
+                                </div>
+                                <input type="range" id="calc-loan" min="10000" max="140000" step="1000" value="80000" oninput="updateCalcUI()">
+                            </div>
 
-let selectedScheme = SCHEME_DEFS[0];
-let selectedPartnerKey = 'p1';
-let lastRankedScores = null; // cache scores so language switch can re-render without re-scoring
+                            <!-- Tenure -->
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_tenure">Repayment Tenure</label>
+                                    <span class="font-bold text-brand-600 text-lg"><span id="val-tenure">36</span> <span data-i18n="txt_months" class="text-sm">Months</span></span>
+                                </div>
+                                <input type="range" id="calc-tenure" min="12" max="60" step="6" value="36" oninput="updateCalcUI()">
+                            </div>
+                            
+                            <!-- Moratorium -->
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_mora">Moratorium Period</label>
+                                    <span class="font-bold text-brand-600 text-lg"><span id="val-mora">3</span> <span data-i18n="txt_months" class="text-sm">Months</span></span>
+                                </div>
+                                <input type="range" id="calc-mora" min="0" max="12" step="1" value="3" oninput="updateCalcUI()">
+                            </div>
 
-/* ---------------- STEPPER NAV ---------------- */
-function goStep(n){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+n).classList.add('active');
-  document.querySelectorAll('.step-dot').forEach(d=>{
-    const s = parseInt(d.dataset.step);
-    d.classList.remove('active','done');
-    if(s === n) d.classList.add('active');
-    else if(s < n) d.classList.add('done');
-  });
-  if(n===2) updateCalc();
-  if(n===3) renderPartners();
-  if(n===4) renderTracker();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-document.querySelectorAll('.step-dot').forEach(d=>{
-  d.addEventListener('click', ()=> goStep(parseInt(d.dataset.step)));
-});
+                            <!-- Interest Rate -->
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_rate">Interest Rate (p.a.)</label>
+                                    <span class="font-bold text-brand-600 text-lg" id="val-rate">6.5%</span>
+                                </div>
+                                <input type="range" id="calc-rate" min="6.0" max="15.0" step="0.5" value="6.5" oninput="updateCalcUI()">
+                            </div>
+                        </div>
+                    </div>
 
-/* ---------------- LANG SWITCH ---------------- */
-function applyLang(lang){
-  currentLang = lang;
-  const dict = I18N[lang];
-  document.body.classList.toggle('lang-hi', lang === 'hi');
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key = el.getAttribute('data-i18n');
-    if(dict[key] !== undefined) el.innerHTML = dict[key];
-  });
-  document.querySelectorAll('.lang-switch button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.lang === lang);
-  });
-  // re-render dynamic sections that hold translated text
-  if(lastRankedScores) renderSchemeList(lastRankedScores);
-  if(document.getElementById('panel-2').classList.contains('active')) updateCalc();
-  if(document.getElementById('panel-3').classList.contains('active')) renderPartners();
-  if(document.getElementById('panel-4').classList.contains('active')) renderTracker();
-}
-document.querySelectorAll('.lang-switch button').forEach(btn=>{
-  btn.addEventListener('click', ()=> applyLang(btn.dataset.lang));
-});
+                    <!-- Output Panel -->
+                    <div class="bg-navy-900 p-8 text-white relative overflow-hidden flex flex-col justify-center">
+                        <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-brand-500 rounded-full opacity-20 blur-[80px]"></div>
+                        
+                        <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 mb-6 backdrop-blur-sm relative z-10">
+                            <p class="text-slate-400 text-sm font-medium mb-1" data-i18n="res_emi">Monthly EMI</p>
+                            <div class="text-4xl md:text-5xl font-bold text-brand-400 mb-2" id="out-emi">₹2,452</div>
+                            <p class="text-xs text-saffron-400 font-medium flex items-center gap-1">
+                                <i class="fas fa-info-circle"></i> 
+                                <span data-i18n="mora_note">EMI repayment begins after month</span> <span id="out-mora-val" class="ml-1">3</span>
+                            </p>
+                        </div>
 
-/* ---------------- VOICE MOCK ---------------- */
-document.getElementById('micBtn').addEventListener('click', function(){
-  const btn = this;
-  btn.classList.add('listening');
-  btn.textContent = '●';
-  setTimeout(()=>{
-    document.getElementById('projectType').value = 'micro';
-    document.getElementById('cost').value = 80000;
-    btn.classList.remove('listening');
-    btn.textContent = '🎤';
-    document.getElementById('voiceText').innerHTML = I18N[currentLang].voice_recognized;
-  }, 1500);
-});
+                        <div class="space-y-4 relative z-10">
+                            <div class="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                                <span class="text-slate-400 font-medium" data-i18n="res_princ">Principal</span>
+                                <span class="font-bold text-lg" id="out-princ">₹80,000</span>
+                            </div>
+                            <div class="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                                <span class="text-slate-400 font-medium" data-i18n="res_int">Total Interest</span>
+                                <span class="font-bold text-lg text-saffron-400" id="out-int">₹8,272</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-white font-bold" data-i18n="res_total">Total Payable</span>
+                                <span class="font-bold text-2xl text-white" id="out-total">₹88,272</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-/* ---------------- SCHEME RECOMMENDER ---------------- */
-document.getElementById('runReco').addEventListener('click', ()=>{
-  const cost = parseInt(document.getElementById('cost').value) || 0;
-  const income = parseInt(document.getElementById('income').value) || 0;
-  const type = document.getElementById('projectType').value;
 
-  let ranked = SCHEME_DEFS.map(s=>{
-    let score = 40;
-    if(type === s.id) score += 35;
-    if(cost >= s.minCost && cost <= s.maxCost) score += 25;
-    if(income <= 500000) score += 15;
-    if(type !== s.id && !(cost>=s.minCost && cost<=s.maxCost)) score -= 20;
-    score = Math.max(20, Math.min(97, score));
-    return {...s, score, inputCost:cost};
-  }).sort((a,b)=> b.score - a.score);
+        <!-- ================= TAB 3: PARTNER LOCATOR ================= -->
+        <section id="tab-locator" class="tab-content">
+            <div class="glass-panel rounded-2xl p-6 max-w-6xl mx-auto border-t-4 border-t-blue-500 shadow-lg">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-navy-900" data-i18n="loc_title">Geo-Spatial Partner Locator</h2>
+                        <p class="text-slate-500 text-sm" data-i18n="loc_sub">Find eligible SCAs, PSBs, and RRBs with healthy fund utilization.</p>
+                    </div>
+                    
+                    <div class="flex w-full md:w-auto bg-white rounded-lg border border-slate-300 p-1 shadow-sm">
+                        <input type="text" placeholder="Pincode / District" class="bg-transparent px-4 py-2 outline-none text-sm w-full md:w-48 font-medium text-slate-700" data-i18n="lbl_search">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
 
-  lastRankedScores = ranked;
-  renderSchemeList(ranked);
-  document.getElementById('resultCard').style.display = 'block';
-  document.getElementById('toCalc').onclick = ()=> goStep(2);
-  document.getElementById('resultCard').scrollIntoView({behavior:'smooth', block:'nearest'});
-});
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Map Mock -->
+                    <div class="lg:col-span-2 bg-slate-200 rounded-xl h-[400px] relative overflow-hidden border border-slate-300 shadow-inner">
+                        <!-- Map Grid Background -->
+                        <div class="absolute inset-0" style="background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 30px 30px;"></div>
+                        
+                        <!-- Route Line SVG -->
+                        <svg class="absolute inset-0 w-full h-full">
+                            <path d="M 200 200 Q 300 150 400 250" stroke="#3b82f6" stroke-width="4" stroke-dasharray="8,8" fill="none" class="opacity-70"/>
+                        </svg>
 
-function renderSchemeList(ranked){
-  const dict = I18N[currentLang];
-  const list = document.getElementById('schemeList');
-  list.innerHTML = '';
-  ranked.forEach((s,i)=>{
-    const name = dict.scheme_names[s.id];
-    const desc = dict.scheme_desc[s.id];
-    const maxTxt = (typeof s.max === 'object') ? s.max[currentLang] : s.max;
-    const tenureTxt = s.tenureTxt[currentLang];
-    const rateTxt = s.id === 'education' ? '6.5%–8%' : (s.rateNum + '%');
-    const div = document.createElement('div');
-    div.className = 'scheme-card' + (i===0 ? ' best':'');
-    div.innerHTML = `
-      <div class="left">
-        <h3>${name} ${i===0 ? `<span class="match-tag">${dict.best_match}</span>`:''}</h3>
-        <p>${desc}</p>
-        <div class="scheme-meta">
-          <span class="meta-chip">${dict.chip_max}: ${maxTxt}</span>
-          <span class="meta-chip">${dict.chip_rate}: ${rateTxt}</span>
-          <span class="meta-chip">${dict.chip_mora}: ${s.moraM} ${dict.unit_months}</span>
-          <span class="meta-chip">${dict.chip_tenure}: ${tenureTxt}</span>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-        <div class="score-ring" style="--pct:${s.score}"><span>${s.score}%</span></div>
-        <button class="btn btn-outline" style="padding:7px 16px;font-size:12px;">${dict.btn_select}</button>
-      </div>`;
-    div.querySelector('button').addEventListener('click', ()=>{
-      selectedScheme = s;
-      document.getElementById('selSchemeName').textContent = dict.scheme_names[s.id];
-      const loanSlider = document.getElementById('loanAmt');
-      loanSlider.max = s.id==='micro'?140000: s.id==='term'?5000000:3000000;
-      loanSlider.value = Math.min(s.inputCost || 80000, loanSlider.max);
-      document.getElementById('rate').value = s.rateNum;
-      document.getElementById('mora').value = s.moraM;
-      goStep(2);
-    });
-    list.appendChild(div);
-  });
-}
+                        <!-- User Pin -->
+                        <div class="absolute top-[180px] left-[180px] flex flex-col items-center">
+                            <div class="w-5 h-5 bg-navy-900 rounded-full border-2 border-white shadow-lg relative">
+                                <div class="absolute inset-0 bg-navy-900 rounded-full animate-ping opacity-50"></div>
+                            </div>
+                            <span class="mt-1 bg-white px-2 py-0.5 rounded text-[10px] font-bold shadow text-slate-700">You</span>
+                        </div>
 
-function resetForm(){
-  document.getElementById('cost').value = 80000;
-  document.getElementById('income').value = 180000;
-  document.getElementById('projectType').value = 'micro';
-  document.getElementById('category').value = 'sc';
-  document.getElementById('resultCard').style.display = 'none';
-  lastRankedScores = null;
-}
+                        <!-- Partner Pin 1 (Eligible) -->
+                        <div class="absolute top-[230px] left-[380px] flex flex-col items-center cursor-pointer transform hover:scale-110 transition">
+                            <div class="w-8 h-8 bg-brand-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white">
+                                <i class="fas fa-building text-sm"></i>
+                            </div>
+                            <span class="mt-1 bg-white border border-brand-200 px-2 py-0.5 rounded text-xs font-bold shadow text-brand-700">UP SC/ST Corp (SCA)</span>
+                        </div>
 
-/* ---------------- CALCULATOR ---------------- */
-['loanAmt','rate','tenure','mora'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', updateCalc);
-});
+                        <!-- Partner Pin 2 (Flagged) -->
+                        <div class="absolute top-[100px] left-[300px] flex flex-col items-center opacity-60">
+                            <div class="w-6 h-6 bg-slate-500 rounded-full border-2 border-white shadow flex items-center justify-center text-white">
+                                <i class="fas fa-building text-[10px]"></i>
+                            </div>
+                            <span class="mt-1 bg-white px-2 py-0.5 rounded text-[10px] font-bold shadow text-slate-500">NBFC-MFI</span>
+                        </div>
+                    </div>
 
-function fmt(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+                    <!-- List -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col gap-3 overflow-y-auto max-h-[400px]">
+                        <!-- Card 1 -->
+                        <div class="border-2 border-brand-500 bg-brand-50 rounded-xl p-4 cursor-pointer relative">
+                            <div class="absolute top-0 right-0 bg-brand-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">Closest</div>
+                            <h4 class="font-bold text-navy-900 text-sm">UP SC/ST Finance Corp (SCA)</h4>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Gomti Nagar • 2.4 <span data-i18n="dist">km away</span></p>
+                            <div class="mt-3 flex gap-2">
+                                <span class="bg-white border border-brand-200 text-brand-700 text-[10px] px-2 py-1 rounded font-bold"><i class="fas fa-check-circle"></i> <span data-i18n="tag_good">High Fund Capacity</span></span>
+                            </div>
+                        </div>
 
-function updateCalc(){
-  const dict = I18N[currentLang];
-  document.getElementById('selSchemeName').textContent = dict.scheme_names[selectedScheme.id] || dict.scheme_names.micro;
+                        <!-- Card 2 -->
+                        <div class="border border-slate-200 hover:border-slate-300 rounded-xl p-4 cursor-pointer transition">
+                            <h4 class="font-bold text-navy-900 text-sm">Lucknow Regional Rural Bank</h4>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Aliganj Branch • 4.1 <span data-i18n="dist">km away</span></p>
+                            <div class="mt-3 flex gap-2">
+                                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded font-bold">Moderate Capacity</span>
+                            </div>
+                        </div>
 
-  const P = parseFloat(document.getElementById('loanAmt').value);
-  const annualRate = parseFloat(document.getElementById('rate').value);
-  const months = parseInt(document.getElementById('tenure').value);
-  const mora = parseInt(document.getElementById('mora').value);
+                        <!-- Card 3 -->
+                        <div class="border border-red-200 bg-red-50/50 rounded-xl p-4 opacity-70">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-700 text-sm">NBFC-MFI Center</h4>
+                                    <p class="text-xs text-slate-500 mt-1 font-medium">Hazratganj • 1.2 <span data-i18n="dist">km away</span></p>
+                                </div>
+                                <i class="fas fa-triangle-exclamation text-red-500"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span class="bg-red-100 text-red-700 border border-red-200 text-[10px] px-2 py-1 rounded font-bold"><i class="fas fa-ban"></i> <span data-i18n="tag_npa">High NPA / Excluded</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  document.getElementById('loanAmtVal').textContent = fmt(P);
-  document.getElementById('rateVal').textContent = annualRate.toFixed(1) + '%';
-  document.getElementById('tenureVal').innerHTML = months + ' <span data-i18n="unit_months">' + dict.unit_months + '</span>';
-  document.getElementById('moraVal').innerHTML = mora + ' <span data-i18n="unit_months">' + dict.unit_months + '</span>';
 
-  const r = annualRate / 12 / 100;
-  const repayMonths = Math.max(1, months - mora);
-  const emi = r === 0 ? P/repayMonths : (P * r * Math.pow(1+r, repayMonths)) / (Math.pow(1+r, repayMonths) - 1);
-  const totalRepay = emi * repayMonths;
-  const totalInterest = totalRepay - P;
+        <!-- ================= TAB 4: TRACKER ================= -->
+        <section id="tab-tracker" class="tab-content">
+            <div class="glass-panel rounded-2xl p-8 max-w-3xl mx-auto shadow-md border-t-4 border-t-purple-500">
+                <div class="flex justify-between items-end mb-8 border-b border-slate-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-navy-900" data-i18n="trk_title">Application Status</h2>
+                        <p class="text-slate-500 text-sm mt-1" data-i18n="trk_sub">Track your loan disbursement stages offline.</p>
+                    </div>
+                    <span class="bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider" data-i18n="st_rev">Under Review</span>
+                </div>
 
-  document.getElementById('emiOut').textContent = fmt(emi);
-  document.getElementById('rPrincipal').textContent = fmt(P);
-  document.getElementById('rInterest').textContent = fmt(totalInterest);
-  document.getElementById('rTotal').textContent = fmt(totalRepay);
-  document.getElementById('moraNote').textContent = dict.mora_note_tpl(mora);
-}
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8 flex justify-between items-center">
+                    <span class="font-mono font-bold text-slate-700" data-i18n="app_id">App ID: APP-26092</span>
+                    <span class="text-sm font-bold text-slate-500">Micro Finance Scheme</span>
+                </div>
 
-/* ---------------- PARTNER LOCATOR ---------------- */
-function renderPartners(){
-  const dict = I18N[currentLang];
-  const list = document.getElementById('partnerList');
-  list.innerHTML = '';
-  PARTNER_KEYS.forEach(p=>{
-    const div = document.createElement('div');
-    div.className = 'partner-card' + (p.status==='flag' ? ' flagged':'');
-    div.innerHTML = `
-      <div>
-        <h4>${dict.partner_names[p.key]}</h4>
-        <div class="type">${dict.partner_types[p.key]} · ${dict.partner_util[p.key]}</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="dist">${p.dist}</div>
-        <span class="${p.status==='ok'?'status-ok':'status-flag'}">${p.status==='ok'?dict.status_ok:dict.status_flag}</span>
-      </div>`;
-    if(p.status === 'ok'){
-      div.style.cursor = 'pointer';
-      if(p.key === selectedPartnerKey) div.style.outline = '2px solid var(--green)';
-      div.addEventListener('click', ()=>{
-        selectedPartnerKey = p.key;
-        document.querySelectorAll('.partner-card').forEach(c=>c.style.outline='none');
-        div.style.outline = '2px solid var(--green)';
-      });
-    }
-    list.appendChild(div);
-  });
-}
+                <!-- Timeline -->
+                <div class="relative pl-6 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                    
+                    <!-- Step 1 -->
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-brand-500 border-4 border-white flex items-center justify-center shadow"></div>
+                        <h4 class="font-bold text-slate-800">Application Submitted</h4>
+                        <p class="text-sm text-slate-500 mt-1">Paperless submission via Bhashini & DigiLocker e-KYC.</p>
+                    </div>
 
-function submitApplication(){
-  goStep(4);
-}
+                    <!-- Step 2 -->
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-brand-500 border-4 border-white flex items-center justify-center shadow"></div>
+                        <h4 class="font-bold text-slate-800">Routed to Partner</h4>
+                        <p class="text-sm text-slate-500 mt-1">Assigned to: UP SC/ST Finance Corp (Gomti Nagar).</p>
+                    </div>
 
-/* ---------------- TRACKER ---------------- */
-function renderTracker(){
-  const dict = I18N[currentLang];
-  const partnerName = dict.partner_names[selectedPartnerKey] || dict.partner_names.p1;
-  const schemeName = dict.scheme_names[selectedScheme.id] || dict.scheme_names.micro;
-  const steps = [
-    {icon:'✓', title:dict.track_submitted_title, desc:dict.track_submitted_desc(partnerName), time:dict.time_now, done:true},
-    {icon:'✓', title:dict.track_verified_title, desc:dict.track_verified_desc(schemeName), time:dict.time_now, done:true},
-    {icon:'⏳', title:dict.track_doc_title, desc:dict.track_doc_desc, time:dict.time_2days, done:false},
-    {icon:'○', title:dict.track_disb_title, desc:dict.track_disb_desc, time:dict.time_pending, done:false},
-  ];
-  const el = document.getElementById('trackTimeline');
-  el.innerHTML = '';
-  steps.forEach((s,i)=>{
-    const div = document.createElement('div');
-    div.className = 'track-item ' + (s.done ? 'done':'pending');
-    div.innerHTML = `
-      <div class="track-dot">${s.icon}</div>
-      ${i < steps.length-1 ? '<div class="track-line"></div>' : ''}
-      <div class="track-content">
-        <h4>${s.title}</h4>
-        <p>${s.desc}</p>
-        <div class="time">${s.time}</div>
-      </div>`;
-    el.appendChild(div);
-  });
-}
+                    <!-- Step 3 (Active) -->
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-purple-500 border-4 border-white shadow flex items-center justify-center">
+                            <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                        </div>
+                        <h4 class="font-bold text-purple-700">SCA Review & Physical Verification</h4>
+                        <p class="text-sm text-slate-500 mt-1">Branch manager is verifying project feasibility.</p>
+                        <span class="inline-block mt-2 bg-purple-50 text-purple-600 text-xs font-bold px-2 py-1 rounded">Est. 2-3 Days</span>
+                    </div>
 
-/* init */
-updateCalc();
-</script>
+                    <!-- Step 4 -->
+                    <div class="relative opacity-40">
+                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-slate-300 border-4 border-white"></div>
+                        <h4 class="font-bold text-slate-800">Sanction & Disbursement</h4>
+                        <p class="text-sm text-slate-500 mt-1">DBT transfer directly to verified beneficiary account.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // Tab Navigation Logic
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Show target
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Update Tab styling
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-700', 'text-white', 'border-brand-500', 'border-saffron-400', 'border-blue-400', 'border-purple-400');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            });
+            
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-slate-400', 'border-transparent');
+            activeBtn.classList.add('bg-slate-700', 'text-white');
+            
+            // Custom border color based on tab
+            if(tabId === 'recommender') activeBtn.classList.add('border-brand-500');
+            if(tabId === 'calculator') activeBtn.classList.add('border-saffron-400');
+            if(tabId === 'locator') activeBtn.classList.add('border-blue-400');
+            if(tabId === 'tracker') activeBtn.classList.add('border-purple-400');
+
+            // Trigger sync button visibility in calculator
+            if(tabId === 'calculator' && AppState.sharedData.recommendedScheme) {
+                document.getElementById('btn-sync').classList.remove('hidden');
+            }
+        }
+
+        // Scheme Recommender Logic
+        function mockVoiceInput() {
+            const btn = document.getElementById('btn-voice');
+            btn.classList.add('listening');
+            if(AppState.lang === 'en') btn.innerHTML = '<i class="fas fa-microphone"></i> Listening...';
+            else btn.innerHTML = '<i class="fas fa-microphone"></i> सुन रहा हूँ...';
+            
+            setTimeout(() => {
+                btn.classList.remove('listening');
+                if(AppState.lang === 'en') btn.innerHTML = '<i class="fas fa-check text-brand-600"></i> Voice Captured';
+                else btn.innerHTML = '<i class="fas fa-check text-brand-600"></i> आवाज़ रिकॉर्ड हो गई';
+                
+                document.getElementById('inp-purpose').value = 'micro';
+                document.getElementById('inp-cost').value = '80000';
+            }, 1500);
+        }
+
+        function runRuleEngine() {
+            const cost = parseInt(document.getElementById('inp-cost').value) || 80000;
+            const purpose = document.getElementById('inp-purpose').value;
+            
+            document.getElementById('reco-empty').style.display = 'none';
+            const results = document.getElementById('reco-results');
+            results.classList.remove('hidden');
+            results.style.animation = 'none';
+            results.offsetHeight; // trigger reflow
+            results.style.animation = null;
+
+            // Simple Rule Engine Mock
+            if (cost <= 140000 && purpose !== 'edu') {
+                AppState.sharedData = { recommendedScheme: 'micro', projectCost: cost, schemeRate: 6.5, schemeMax: 140000, schemeMora: 3 };
+                document.getElementById('res-title-1').innerText = i18n[AppState.lang].scheme_micro;
+                document.getElementById('res-desc-1').innerText = i18n[AppState.lang].desc_micro;
+                document.getElementById('res-rate').innerText = "6.5%";
+            } else if (cost > 140000 && purpose !== 'edu') {
+                AppState.sharedData = { recommendedScheme: 'term', projectCost: cost, schemeRate: 8.0, schemeMax: 5000000, schemeMora: 6 };
+                document.getElementById('res-title-1').innerText = i18n[AppState.lang].scheme_term;
+                document.getElementById('res-desc-1').innerText = i18n[AppState.lang].desc_term;
+                document.getElementById('res-rate').innerText = "8.0%";
+            }
+        }
+
+        function selectSchemeAndJump(targetTab) {
+            switchTab(targetTab);
+            if(targetTab === 'calculator') {
+                syncFromRecommender();
+            }
+        }
+
+        // Calculator Logic
+        function syncFromRecommender() {
+            if(!AppState.sharedData.recommendedScheme) return;
+            
+            const sd = AppState.sharedData;
+            document.getElementById('calc-loan').max = sd.schemeMax;
+            document.getElementById('calc-loan').value = Math.min(sd.projectCost, sd.schemeMax);
+            document.getElementById('calc-rate').value = sd.schemeRate;
+            document.getElementById('calc-mora').value = sd.schemeMora;
+            
+            document.getElementById('sync-msg').classList.remove('hidden');
+            setTimeout(() => document.getElementById('sync-msg').classList.add('hidden'), 3000);
+            
+            updateCalcUI();
+        }
+
+        function updateCalcUI() {
+            const p = parseFloat(document.getElementById('calc-loan').value);
+            const m = parseInt(document.getElementById('calc-tenure').value);
+            const mora = parseInt(document.getElementById('calc-mora').value);
+            const r_annual = parseFloat(document.getElementById('calc-rate').value);
+
+            // Update Labels
+            document.getElementById('val-loan').innerText = '₹' + p.toLocaleString('en-IN');
+            document.getElementById('val-tenure').innerText = m;
+            document.getElementById('val-mora').innerText = mora;
+            document.getElementById('val-rate').innerText = r_annual + '%';
+
+            // Math
+            const r_monthly = (r_annual / 12) / 100;
+            const repayMonths = Math.max(1, m - mora);
+            let emi = 0;
+            if (r_monthly > 0) {
+                emi = (p * r_monthly * Math.pow(1 + r_monthly, repayMonths)) / (Math.pow(1 + r_monthly, repayMonths) - 1);
+            } else {
+                emi = p / repayMonths;
+            }
+            
+            const totalRepay = emi * repayMonths;
+            const totalInterest = totalRepay - p;
+
+            // Output
+            document.getElementById('out-emi').innerText = '₹' + Math.round(emi).toLocaleString('en-IN');
+            document.getElementById('out-princ').innerText = '₹' + Math.round(p).toLocaleString('en-IN');
+            document.getElementById('out-int').innerText = '₹' + Math.round(totalInterest).toLocaleString('en-IN');
+            document.getElementById('out-total').innerText = '₹' + Math.round(totalRepay).toLocaleString('en-IN');
+            document.getElementById('out-mora-val').innerText = mora;
+        }
+
+        // Initialize default state
+        setLanguage('en');
+        updateCalcUI();
+    </script>
 </body>
 </html>
