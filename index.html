@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SamriddhiSetu — AI Scheme Matching Demo</title>
+<style>
+  :root{
+    --saffron:#FF9933;
+    --green:#138808;
+    --navy:#0B2545;
+    --blue:#1565C0;
+    --bg:#F5F7FA;
+    --card:#FFFFFF;
+    --ink:#1A2233;
+    --muted:#6B7686;
+    --border:#E3E7ED;
+    --radius:14px;
+    --shadow:0 4px 18px rgba(11,37,69,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .app{max-width:1200px;margin:0 auto;padding:0 20px 60px;}
+
+  /* HEADER */
+  header{
+    background:linear-gradient(120deg, var(--navy) 0%, #123a6b 60%, var(--blue) 100%);
+    color:#fff;
+    padding:22px 20px;
+    border-radius:0 0 22px 22px;
+    margin-bottom:26px;
+    box-shadow:var(--shadow);
+  }
+  .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .logo{
+    width:46px;height:46px;border-radius:12px;
+    background:linear-gradient(135deg,var(--saffron),var(--green));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:20px;color:#fff;
+    box-shadow:0 3px 10px rgba(0,0,0,0.25);
+  }
+  .brand h1{font-size:20px;font-weight:700;letter-spacing:.3px;}
+  .brand p{font-size:12px;color:#cdd8ea;margin-top:2px;}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .pill{
+    font-size:11.5px;padding:6px 12px;border-radius:20px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.25);
+    color:#e9eefb;
+  }
+  .lang-switch{display:flex;gap:6px;background:rgba(255,255,255,0.1);padding:4px;border-radius:20px;}
+  .lang-switch button{
+    border:none;background:transparent;color:#dce6f7;font-size:12px;
+    padding:6px 12px;border-radius:16px;cursor:pointer;font-weight:600;
+  }
+  .lang-switch button.active{background:#fff;color:var(--navy);}
+
+  /* STEPPER */
+  .stepper{
+    display:flex;gap:8px;justify-content:center;margin:0 auto 28px;
+    max-width:900px;flex-wrap:wrap;
+  }
+  .step-dot{
+    flex:1;min-width:120px;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:10px 14px;text-align:center;
+    font-size:12.5px;font-weight:600;color:var(--muted);
+    cursor:pointer;transition:all .2s;
+    position:relative;
+  }
+  .step-dot .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:var(--border);
+    color:var(--muted);font-size:11px;margin-right:6px;
+  }
+  .step-dot.active{border-color:var(--saffron);background:#FFF6EC;color:var(--navy);box-shadow:var(--shadow);}
+  .step-dot.active .num{background:var(--saffron);color:#fff;}
+  .step-dot.done{color:var(--green);}
+  .step-dot.done .num{background:var(--green);color:#fff;}
+
+  section.panel{display:none;}
+  section.panel.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);
+    margin-bottom:20px;
+  }
+  .card h2{font-size:19px;margin-bottom:4px;color:var(--navy);}
+  .card .sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+
+  /* VOICE BAR */
+  .voice-bar{
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(90deg,#F0F6FF,#F8FBFF);
+    border:1px dashed var(--blue);
+    border-radius:12px;padding:12px 16px;margin-bottom:22px;
+  }
+  .mic-btn{
+    width:42px;height:42px;border-radius:50%;border:none;
+    background:var(--blue);color:#fff;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 8px rgba(21,101,192,0.4);flex-shrink:0;
+    transition:transform .15s;
+  }
+  .mic-btn:hover{transform:scale(1.06);}
+  .mic-btn.listening{animation:pulse 1s infinite;background:#D32F2F;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(211,47,47,.5);}70%{box-shadow:0 0 0 12px rgba(211,47,47,0);}100%{box-shadow:0 0 0 0 rgba(211,47,47,0);}}
+  .voice-text{font-size:13px;color:var(--navy);}
+  .voice-text b{color:var(--blue);}
+
+  /* FORM */
+  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  @media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;}
+  .field select, .field input{
+    width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--border);
+    font-size:14px;background:#fbfcfe;color:var(--ink);
+  }
+  .field select:focus, .field input:focus{outline:2px solid var(--blue);border-color:var(--blue);}
+  .btn-row{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;}
+  .btn{
+    padding:12px 24px;border-radius:10px;border:none;font-weight:700;font-size:14px;
+    cursor:pointer;transition:transform .15s, box-shadow .15s;
+  }
+  .btn-primary{background:linear-gradient(90deg,var(--saffron),#FF7A00);color:#fff;box-shadow:0 4px 12px rgba(255,122,0,0.35);}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--navy);}
+  .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+  .btn-green{background:var(--green);color:#fff;}
+
+  /* RESULT SCHEME CARDS */
+  .scheme-list{display:flex;flex-direction:column;gap:14px;}
+  .scheme-card{
+    border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;
+    transition:.2s;
+  }
+  .scheme-card.best{border-color:var(--green);background:#F3FBF1;}
+  .scheme-card .left{flex:1;min-width:240px;}
+  .scheme-card h3{font-size:15.5px;color:var(--navy);margin-bottom:4px;}
+  .match-tag{
+    display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;
+    background:var(--green);color:#fff;margin-left:8px;vertical-align:middle;
+  }
+  .scheme-card p{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .scheme-meta{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;}
+  .meta-chip{font-size:11.5px;background:#EEF3FA;color:var(--navy);padding:4px 10px;border-radius:8px;font-weight:600;}
+  .score-ring{
+    width:64px;height:64px;border-radius:50%;
+    background:conic-gradient(var(--green) calc(var(--pct,80)*1%), #E7ECF3 0);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .score-ring span{
+    width:50px;height:50px;border-radius:50%;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--navy);
+  }
+
+  /* CALCULATOR */
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media(max-width:800px){.calc-grid{grid-template-columns:1fr;}}
+  .slider-field{margin-bottom:20px;}
+  .slider-field label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;}
+  .slider-field .val{color:var(--blue);font-weight:800;}
+  input[type=range]{width:100%;accent-color:var(--blue);}
+  .result-box{
+    background:linear-gradient(135deg,#0B2545,#123a6b);color:#fff;border-radius:14px;padding:24px;
+    display:flex;flex-direction:column;gap:14px;justify-content:center;
+  }
+  .result-row{display:flex;justify-content:space-between;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,0.12);padding-bottom:10px;}
+  .result-row:last-child{border-bottom:none;}
+  .result-row b{font-size:16px;}
+  .emi-big{font-size:34px;font-weight:800;color:var(--saffron);}
+  .emi-label{font-size:12px;color:#cdd8ea;}
+  .moratorium-note{font-size:11.5px;background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:8px;color:#dce6f7;}
+
+  /* PARTNER LOCATOR */
+  .locator-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;}
+  @media(max-width:800px){.locator-wrap{grid-template-columns:1fr;}}
+  .map-mock{
+    background:
+      radial-gradient(circle at 30% 30%, #d9e8ff 0, transparent 40%),
+      radial-gradient(circle at 70% 60%, #d3f2df 0, transparent 40%),
+      #EAF1FB;
+    border-radius:14px;border:1px solid var(--border);
+    height:340px;position:relative;overflow:hidden;
+  }
+  .map-mock svg{position:absolute;top:0;left:0;width:100%;height:100%;}
+  .map-pin{
+    position:absolute;width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);cursor:pointer;transform:translate(-50%,-50%);
+    border:2px solid #fff;transition:.15s;
+  }
+  .map-pin:hover{transform:translate(-50%,-50%) scale(1.15);}
+  .map-pin.user{background:var(--saffron);}
+  .map-pin.eligible{background:var(--green);}
+  .map-pin.flagged{background:#9aa4b2;}
+  .partner-list{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;padding-right:4px;}
+  .partner-card{
+    border:1px solid var(--border);border-radius:10px;padding:12px 14px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .partner-card.flagged{opacity:.55;}
+  .partner-card h4{font-size:13.5px;color:var(--navy);}
+  .partner-card .type{font-size:11px;color:var(--muted);}
+  .status-ok{font-size:11px;font-weight:700;color:var(--green);background:#E7F7E5;padding:3px 9px;border-radius:10px;}
+  .status-flag{font-size:11px;font-weight:700;color:#B23B3B;background:#FBEAEA;padding:3px 9px;border-radius:10px;}
+  .dist{font-size:12px;color:var(--muted);white-space:nowrap;}
+
+  /* TRACKER */
+  .track-timeline{display:flex;flex-direction:column;gap:0;margin-top:10px;}
+  .track-item{display:flex;gap:16px;position:relative;padding-bottom:28px;}
+  .track-item:last-child{padding-bottom:0;}
+  .track-dot{
+    width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;z-index:1;
+  }
+  .track-item.pending .track-dot{background:var(--border);color:var(--muted);}
+  .track-line{position:absolute;left:14px;top:30px;bottom:0;width:2px;background:var(--border);}
+  .track-item:last-child .track-line{display:none;}
+  .track-item.done .track-line{background:var(--green);}
+  .track-content h4{font-size:13.5px;color:var(--navy);}
+  .track-content p{font-size:12px;color:var(--muted);margin-top:2px;}
+  .track-content .time{font-size:11px;color:#9aa4b2;margin-top:3px;}
+
+  footer{text-align:center;font-size:11.5px;color:var(--muted);margin-top:20px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo">S</div>
+      <div>
+        <h1>SamriddhiSetu <span style="font-weight:400;font-size:12px;color:#cdd8ea;">| समृद्धि सेतु</span></h1>
+        <p>AI-Driven Scheme Matching · Ministry of Social Justice &amp; Empowerment (MoSJE)</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+      <div class="badge-row">
+        <span class="pill">SIH26092 · Team Invictus</span>
+        <span class="pill">🔒 DPDP Act 2023 Compliant</span>
+      </div>
+      <div class="lang-switch">
+        <button class="active" data-lang="en">EN</button>
+        <button data-lang="hi">हिंदी</button>
+        <button data-lang="voice">🎙 Voice</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+
+  <div class="stepper">
+    <div class="step-dot active" data-step="1"><span class="num">1</span>Scheme Recommender</div>
+    <div class="step-dot" data-step="2"><span class="num">2</span>Financial Calculator</div>
+    <div class="step-dot" data-step="3"><span class="num">3</span>Partner Locator</div>
+    <div class="step-dot" data-step="4"><span class="num">4</span>Track Application</div>
+  </div>
+
+  <!-- STEP 1: SCHEME RECOMMENDER -->
+  <section class="panel active" id="panel-1">
+    <div class="card">
+      <h2>Smart Scheme Recommender</h2>
+      <p class="sub">Rule-based AI engine · matches your profile against MoSJE credit &amp; education schemes in seconds</p>
+
+      <div class="voice-bar">
+        <button class="mic-btn" id="micBtn" title="Try voice input">🎤</button>
+        <div class="voice-text">Try it: <b>"मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए"</b> → auto-fills the form below (demo)</div>
+      </div>
+
+      <div class="form-grid" id="recoForm">
+        <div class="field">
+          <label>Project / Purpose Type</label>
+          <select id="projectType">
+            <option value="micro">Micro Business (tailoring, kirana, handicraft)</option>
+            <option value="term">Larger Project (workshop, transport, manufacturing)</option>
+            <option value="education">Higher Education (India / Abroad)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Estimated Project / Course Cost (₹)</label>
+          <input type="number" id="cost" value="80000" min="1000" step="1000">
+        </div>
+        <div class="field">
+          <label>Annual Family Income (₹)</label>
+          <input type="number" id="income" value="180000" min="0" step="1000">
+        </div>
+        <div class="field">
+          <label>Applicant Category</label>
+          <select id="category">
+            <option value="sc">Scheduled Caste (SC)</option>
+            <option value="general">General / Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="runReco">✦ Get AI Recommendation</button>
+        <button class="btn btn-outline" onclick="resetForm()">Reset</button>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard" style="display:none;">
+      <h2>Recommended Schemes</h2>
+      <p class="sub">Ranked by eligibility fit — based on cost slab, income ceiling &amp; purpose</p>
+      <div class="scheme-list" id="schemeList"></div>
+      <div class="btn-row">
+        <button class="btn btn-green" id="toCalc">Proceed to Financial Calculator →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: FINANCIAL CALCULATOR -->
+  <section class="panel" id="panel-2">
+    <div class="card">
+      <h2>Financial Calculator</h2>
+      <p class="sub">Live EMI projection for <b id="selSchemeName">Micro Finance Scheme</b> · adjust the sliders</p>
+      <div class="calc-grid">
+        <div>
+          <div class="slider-field">
+            <label>Loan Amount <span class="val" id="loanAmtVal">₹80,000</span></label>
+            <input type="range" id="loanAmt" min="10000" max="1400000" step="5000" value="80000">
+          </div>
+          <div class="slider-field">
+            <label>Interest Rate (p.a.) <span class="val" id="rateVal">6.5%</span></label>
+            <input type="range" id="rate" min="6.5" max="15" step="0.1" value="6.5">
+          </div>
+          <div class="slider-field">
+            <label>Tenure <span class="val" id="tenureVal">36 months</span></label>
+            <input type="range" id="tenure" min="12" max="120" step="6" value="36">
+          </div>
+          <div class="slider-field">
+            <label>Moratorium Period <span class="val" id="moraVal">3 months</span></label>
+            <input type="range" id="mora" min="3" max="12" step="1" value="3">
+          </div>
+        </div>
+        <div class="result-box">
+          <div>
+            <div class="emi-label">Estimated Monthly EMI</div>
+            <div class="emi-big" id="emiOut">₹2,451</div>
+          </div>
+          <div class="result-row"><span>Principal</span><b id="rPrincipal">₹80,000</b></div>
+          <div class="result-row"><span>Total Interest Payable</span><b id="rInterest">₹8,236</b></div>
+          <div class="result-row"><span>Total Repayment</span><b id="rTotal">₹88,236</b></div>
+          <div class="moratorium-note" id="moraNote">📌 No EMI charged during the 3-month moratorium — repayment begins from month 4.</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
+        <button class="btn btn-green" onclick="goStep(3)">Find Channel Partners →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: GEO PARTNER LOCATOR -->
+  <section class="panel" id="panel-3">
+    <div class="card">
+      <h2>Geo-Spatial Partner Locator &amp; Router</h2>
+      <p class="sub">Nearest eligible Channel Partners — auto-filtered by current fund utilization &amp; NPA health</p>
+      <div class="locator-wrap">
+        <div class="map-mock" id="mapMock">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M0,60 Q25,40 50,55 T100,45" stroke="#c7d7ee" stroke-width="1" fill="none"/>
+            <path d="M0,80 Q40,70 60,85 T100,75" stroke="#c7d7ee" stroke-width="1" fill="none"/>
+          </svg>
+          <div class="map-pin user" style="top:50%;left:50%;" title="You">📍</div>
+          <div class="map-pin eligible" style="top:30%;left:30%;" title="Lucknow RRB">🏦</div>
+          <div class="map-pin eligible" style="top:65%;left:35%;" title="SCA Kanpur Rd">🏛</div>
+          <div class="map-pin eligible" style="top:35%;left:70%;" title="NBFC-MFI Gomti">🏢</div>
+          <div class="map-pin flagged" style="top:70%;left:68%;" title="High NPA — flagged">⛔</div>
+        </div>
+        <div class="partner-list" id="partnerList"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
+        <button class="btn btn-green" onclick="submitApplication()">Route Application to Selected Partner →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: TRACKING -->
+  <section class="panel" id="panel-4">
+    <div class="card">
+      <h2>Application Tracking</h2>
+      <p class="sub">Real-time status · Application ID <b id="appId">SST-2026-88213</b></p>
+      <div class="track-timeline" id="trackTimeline"></div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(3)">← Back</button>
+        <button class="btn btn-primary" onclick="goStep(1)">Start a New Application</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>Mock demo prototype for SIH 2026 · PS 26092 · This is a simulated, offline demonstration — no real data or backend calls are made.</footer>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const SCHEMES = [
+  {
+    id:'micro', name:'Micro Finance Scheme', minCost:0, maxCost:140000, rate:'6.5% p.a.',
+    max:'₹1.40 Lakh', mora:'3 months', tenure:'up to 5 yrs',
+    desc:'For small business / self-employment projects such as tailoring shops, kirana stores, handicraft units.'
+  },
+  {
+    id:'term', name:'Term Loan Scheme', minCost:140001, maxCost:5000000, rate:'8% p.a.',
+    max:'₹50.00 Lakh', mora:'6 months', tenure:'up to 10 yrs',
+    desc:'For larger projects — workshops, transport vehicles, manufacturing setups, and expansion of existing units.'
+  },
+  {
+    id:'education', name:'Educational Loan Scheme', minCost:0, maxCost:3000000, rate:'6.5%–8% p.a.',
+    max:'Course-dependent', mora:'12 months', tenure:'up to 15 yrs',
+    desc:'Covers tuition, hostel &amp; related expenses for higher education in India or abroad, up to 90% of cost.'
+  }
+];
+
+const PARTNERS = [
+  {name:'Lucknow Regional Rural Bank', type:'RRB · Channel Partner', dist:'1.2 km', status:'ok', util:'82% fund utilization'},
+  {name:'UP SC/ST Corp SCA — Kanpur Rd Branch', type:'State Channelizing Agency', dist:'2.8 km', status:'ok', util:'91% fund utilization'},
+  {name:'Gomti NBFC-MFI Center', type:'NBFC-MFI', dist:'3.5 km', status:'ok', util:'76% fund utilization'},
+  {name:'Alambagh PSB Branch', type:'Public Sector Bank', dist:'4.6 km', status:'flag', util:'High NPA — funds paused'}
+];
+
+let selectedScheme = SCHEMES[0];
+let selectedPartner = null;
+
+/* ---------------- STEPPER NAV ---------------- */
+function goStep(n){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+n).classList.add('active');
+  document.querySelectorAll('.step-dot').forEach(d=>{
+    const s = parseInt(d.dataset.step);
+    d.classList.remove('active','done');
+    if(s === n) d.classList.add('active');
+    else if(s < n) d.classList.add('done');
+  });
+  if(n===2) updateCalc();
+  if(n===3) renderPartners();
+  if(n===4) renderTracker();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.step-dot').forEach(d=>{
+  d.addEventListener('click', ()=> goStep(parseInt(d.dataset.step)));
+});
+
+/* ---------------- LANG SWITCH (cosmetic demo) ---------------- */
+document.querySelectorAll('.lang-switch button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+/* ---------------- VOICE MOCK ---------------- */
+document.getElementById('micBtn').addEventListener('click', function(){
+  const btn = this;
+  btn.classList.add('listening');
+  btn.textContent = '●';
+  setTimeout(()=>{
+    document.getElementById('projectType').value = 'micro';
+    document.getElementById('cost').value = 80000;
+    btn.classList.remove('listening');
+    btn.textContent = '🎤';
+    document.querySelector('.voice-text').innerHTML = '✅ Recognized: <b>Tailoring shop, ₹80,000</b> — form auto-filled via Bhashini ASR + NLP intent parsing.';
+  }, 1600);
+});
+
+/* ---------------- SCHEME RECOMMENDER ---------------- */
+document.getElementById('runReco').addEventListener('click', ()=>{
+  const cost = parseInt(document.getElementById('cost').value) || 0;
+  const income = parseInt(document.getElementById('income').value) || 0;
+  const type = document.getElementById('projectType').value;
+
+  let ranked = SCHEMES.map(s=>{
+    let score = 40;
+    if(type === s.id) score += 35;
+    if(cost >= s.minCost && cost <= s.maxCost) score += 25;
+    if(income <= 500000) score += 15;
+    if(type !== s.id && !(cost>=s.minCost && cost<=s.maxCost)) score -= 20;
+    score = Math.max(20, Math.min(97, score));
+    return {...s, score};
+  }).sort((a,b)=> b.score - a.score);
+
+  const list = document.getElementById('schemeList');
+  list.innerHTML = '';
+  ranked.forEach((s,i)=>{
+    const div = document.createElement('div');
+    div.className = 'scheme-card' + (i===0 ? ' best':'');
+    div.innerHTML = `
+      <div class="left">
+        <h3>${s.name} ${i===0 ? '<span class="match-tag">BEST MATCH</span>':''}</h3>
+        <p>${s.desc}</p>
+        <div class="scheme-meta">
+          <span class="meta-chip">Max: ${s.max}</span>
+          <span class="meta-chip">Rate: ${s.rate}</span>
+          <span class="meta-chip">Moratorium: ${s.mora}</span>
+          <span class="meta-chip">Tenure: ${s.tenure}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div class="score-ring" style="--pct:${s.score}"><span>${s.score}%</span></div>
+        <button class="btn btn-outline" style="padding:6px 14px;font-size:12px;" data-id="${s.id}">Select</button>
+      </div>`;
+    div.querySelector('button').addEventListener('click', ()=>{
+      selectedScheme = s;
+      document.getElementById('selSchemeName').textContent = s.name;
+      const loanSlider = document.getElementById('loanAmt');
+      loanSlider.max = s.id==='micro'?140000: s.id==='term'?5000000:3000000;
+      loanSlider.value = Math.min(cost || 80000, loanSlider.max);
+      document.getElementById('rate').value = parseFloat(s.rate) || 6.5;
+      document.getElementById('mora').value = parseInt(s.mora) || 3;
+      goStep(2);
+    });
+    list.appendChild(div);
+  });
+
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('toCalc').onclick = ()=> goStep(2);
+});
+
+function resetForm(){
+  document.getElementById('cost').value = 80000;
+  document.getElementById('income').value = 180000;
+  document.getElementById('projectType').value = 'micro';
+  document.getElementById('category').value = 'sc';
+  document.getElementById('resultCard').style.display = 'none';
+}
+
+/* ---------------- CALCULATOR ---------------- */
+['loanAmt','rate','tenure','mora'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateCalc);
+});
+
+function fmt(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+function updateCalc(){
+  const P = parseFloat(document.getElementById('loanAmt').value);
+  const annualRate = parseFloat(document.getElementById('rate').value);
+  const months = parseInt(document.getElementById('tenure').value);
+  const mora = parseInt(document.getElementById('mora').value);
+
+  document.getElementById('loanAmtVal').textContent = fmt(P);
+  document.getElementById('rateVal').textContent = annualRate.toFixed(1) + '%';
+  document.getElementById('tenureVal').textContent = months + ' months';
+  document.getElementById('moraVal').textContent = mora + ' months';
+
+  const r = annualRate / 12 / 100;
+  const repayMonths = Math.max(1, months - mora);
+  const emi = r === 0 ? P/repayMonths : (P * r * Math.pow(1+r, repayMonths)) / (Math.pow(1+r, repayMonths) - 1);
+  const totalRepay = emi * repayMonths;
+  const totalInterest = totalRepay - P;
+
+  document.getElementById('emiOut').textContent = fmt(emi);
+  document.getElementById('rPrincipal').textContent = fmt(P);
+  document.getElementById('rInterest').textContent = fmt(totalInterest);
+  document.getElementById('rTotal').textContent = fmt(totalRepay);
+  document.getElementById('moraNote').textContent =
+    `📌 No EMI charged during the ${mora}-month moratorium — repayment begins from month ${mora+1}.`;
+}
+
+/* ---------------- PARTNER LOCATOR ---------------- */
+function renderPartners(){
+  const list = document.getElementById('partnerList');
+  list.innerHTML = '';
+  PARTNERS.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'partner-card' + (p.status==='flag' ? ' flagged':'');
+    div.innerHTML = `
+      <div>
+        <h4>${p.name}</h4>
+        <div class="type">${p.type} · ${p.util}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="dist">${p.dist}</div>
+        <span class="${p.status==='ok'?'status-ok':'status-flag'}">${p.status==='ok'?'✓ Eligible':'⛔ NPA Flag'}</span>
+      </div>`;
+    if(p.status === 'ok'){
+      div.style.cursor = 'pointer';
+      div.addEventListener('click', ()=>{
+        selectedPartner = p;
+        document.querySelectorAll('.partner-card').forEach(c=>c.style.outline='none');
+        div.style.outline = '2px solid var(--green)';
+      });
+    }
+    list.appendChild(div);
+  });
+  if(!selectedPartner) selectedPartner = PARTNERS[0];
+}
+
+function submitApplication(){
+  goStep(4);
+}
+
+/* ---------------- TRACKER ---------------- */
+function renderTracker(){
+  const steps = [
+    {icon:'✓', title:'Application Submitted', desc:`Routed to ${selectedPartner ? selectedPartner.name : 'Lucknow Regional Rural Bank'} via SamriddhiSetu`, time:'Just now', done:true},
+    {icon:'✓', title:'Scheme & Eligibility Verified', desc:`${selectedScheme.name} — auto-matched by AI engine`, time:'Just now', done:true},
+    {icon:'⏳', title:'Document Verification', desc:'Channel Partner reviewing KYC & income proof', time:'Expected in 2 days', done:false},
+    {icon:'○', title:'Sanction & Disbursement', desc:'DBT credit to registered bank account', time:'Pending', done:false},
+  ];
+  const el = document.getElementById('trackTimeline');
+  el.innerHTML = '';
+  steps.forEach((s,i)=>{
+    const div = document.createElement('div');
+    div.className = 'track-item ' + (s.done ? 'done':'pending');
+    div.innerHTML = `
+      <div class="track-dot">${s.icon}</div>
+      ${i < steps.length-1 ? '<div class="track-line"></div>' : ''}
+      <div class="track-content">
+        <h4>${s.title}</h4>
+        <p>${s.desc}</p>
+        <div class="time">${s.time}</div>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+/* init */
+updateCalc();
+</script>
+</body>
+</html>
