@@ -1,671 +1,1076 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SamriddhiSetu - MoSJE AI Scheme Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                        hi: ['"Noto Sans Devanagari"', 'sans-serif']
-                    },
-                    colors: {
-                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 900: '#14532d' },
-                        saffron: { 50: '#fff7ed', 500: '#f97316', 600: '#ea580c' },
-                        navy: { 800: '#1e293b', 900: '#0f172a' }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background: #f4f7f9; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
-        .tab-content { display: none; animation: fadeIn 0.4s ease-out forwards; }
-        .tab-content.active { display: block; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
-        
-        .listening { animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; background-color: #ef4444 !important; color: white !important; }
-        
-        /* Custom Range Slider */
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; background: #16a34a; cursor: pointer; margin-top: -8px; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4); transition: transform 0.1s; }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #cbd5e1; border-radius: 3px; }
-        
-        /* Language Toggle Switch */
-        .lang-toggle { position: relative; width: 80px; height: 34px; background: #1e293b; border-radius: 20px; padding: 2px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border: 1px solid #334155; }
-        .lang-toggle .slider { position: absolute; width: 36px; height: 28px; background: #22c55e; border-radius: 16px; transition: 0.3s; z-index: 1; }
-        .lang-toggle.hi .slider { transform: translateX(40px); }
-        .lang-text { z-index: 2; width: 50%; text-align: center; font-size: 12px; font-weight: 700; color: #fff; pointer-events: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SamriddhiSetu - MoSJE AI Scheme Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = { theme: { extend: {
+  fontFamily: { sans: ['Outfit','sans-serif'], hi: ['"Noto Sans Devanagari"','sans-serif'] },
+  colors: {
+    brand: {50:'#f0fdf4',100:'#dcfce7',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',900:'#14532d'},
+    saffron: {50:'#fff7ed',400:'#fb923c',500:'#f97316',600:'#ea580c'},
+    navy: {700:'#334155',800:'#1e293b',900:'#0f172a'}
+  }
+}}}
+</script>
+<style>
+body{background:#f4f7f9;}
+.tab-content{display:none;animation:fadeIn .35s ease-out forwards;}
+.tab-content.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.glass-panel{background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:0 10px 30px -10px rgba(0,0,0,.06);}
+
+/* Voice orb */
+.voice-orb{
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #4ade80, #16a34a 60%, #14532d 100%);
+  box-shadow:0 10px 40px -8px rgba(22,163,74,.5), inset 0 0 30px rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.25rem;
+  cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;
+  position:relative;
+}
+.voice-orb:hover{transform:scale(1.05);}
+.voice-orb.listening{animation:orbPulse 1.4s ease-in-out infinite;}
+@keyframes orbPulse{
+  0%{box-shadow:0 10px 40px -8px rgba(239,68,68,.55),0 0 0 0 rgba(239,68,68,.4);}
+  70%{box-shadow:0 10px 40px -8px rgba(239,68,68,.55),0 0 0 22px rgba(239,68,68,0);}
+  100%{box-shadow:0 10px 40px -8px rgba(239,68,68,.55),0 0 0 0 rgba(239,68,68,0);}
+}
+.voice-orb.listening{background:radial-gradient(circle at 35% 30%, #f87171, #ef4444 60%, #7f1d1d 100%);}
+
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.dot{animation:typingDot 1.1s infinite;}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:20px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:20px;width:20px;border-radius:50%;background:#16a34a;cursor:pointer;margin-top:-7px;box-shadow:0 2px 6px rgba(22,163,74,.4);}
+input[type=range]::-webkit-slider-runnable-track{width:100%;height:6px;background:#cbd5e1;border-radius:3px;}
+input[type=range]::-moz-range-thumb{height:20px;width:20px;border-radius:50%;background:#16a34a;cursor:pointer;border:none;}
+input[type=range]::-moz-range-track{height:6px;background:#cbd5e1;border-radius:3px;}
+
+.lang-toggle{position:relative;width:72px;height:32px;background:#1e293b;border-radius:20px;padding:2px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border:1px solid #334155;flex-shrink:0;}
+.lang-toggle .slider{position:absolute;width:32px;height:26px;background:#22c55e;border-radius:16px;transition:.3s;z-index:1;}
+.lang-toggle.hi .slider{transform:translateX(36px);}
+.lang-text{z-index:2;width:50%;text-align:center;font-size:10px;font-weight:700;color:#fff;pointer-events:none;}
+
+.chat-scroll::-webkit-scrollbar{width:5px;}
+.chat-scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px;}
+.no-scrollbar::-webkit-scrollbar{display:none;}
+.mini-num{width:6.5rem;text-align:right;font-weight:700;outline:none;background:transparent;}
+
+/* Results Panel slide-in animation */
+#result-col { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateX(30px); display: none; }
+#result-col.visible { opacity: 1; transform: translateX(0); display: block; }
+</style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col overflow-x-hidden">
 
-    <!-- Global App State -->
-    <script>
-        const AppState = {
-            lang: 'en',
-            sharedData: {
-                projectCost: 80000,
-                recommendedScheme: null,
-                schemeRate: 6.5,
-                schemeMax: 140000,
-                schemeMora: 3
-            }
-        };
+<script>
+const AppState = {
+  lang:'en',
+  currentApp:{ purpose:null, cost:null, income:null },
+  sharedData:{ recommendedScheme:null, projectCost:80000, schemeRate:6.5, schemeMax:140000, schemeMora:3 },
+};
 
-        const i18n = {
-            en: {
-                title: "SamriddhiSetu", tagline: "MoSJE AI Channel Finance Portal",
-                tab_reco: "Scheme Matcher", tab_calc: "EMI Calculator", tab_loc: "Partner Locator", tab_track: "Tracker",
-                
-                // Recommender
-                rec_title: "Smart Scheme Recommender", rec_sub: "AI-driven engine to find the exact credit scheme based on your profile.",
-                lbl_purpose: "Project Purpose", opt_micro: "Micro Business (Tailoring, Kirana)", opt_term: "Large Project (Manufacturing)", opt_edu: "Higher Education",
-                lbl_cost: "Estimated Cost (₹)", lbl_income: "Annual Family Income (₹)", lbl_cat: "Category", opt_sc: "Scheduled Caste (SC)", opt_other: "Other",
-                btn_voice: "Tap to Speak (Demo)", btn_find: "Find Eligible Schemes",
-                res_match: "Best Match",
-                scheme_micro: "Micro Finance Scheme", desc_micro: "Up to ₹1.40 Lakh for small business setups.",
-                scheme_term: "Term Loan Scheme", desc_term: "Up to ₹50 Lakh for larger projects (DPR required).",
-                scheme_edu: "Educational Loan", desc_edu: "Up to 90% of course cost.",
-                
-                // Calculator
-                cal_title: "Financial Calculator", cal_sub: "Dynamic EMI, Moratorium, and Interest projection tool.",
-                btn_sync: "Sync from Matcher", sync_msg: "Synced with Micro Finance settings",
-                lbl_loan_amt: "Loan Amount Requested", lbl_tenure: "Repayment Tenure", lbl_mora: "Moratorium Period",
-                lbl_rate: "Interest Rate (p.a.)", txt_months: "Months",
-                res_emi: "Monthly EMI", res_princ: "Principal", res_int: "Total Interest", res_total: "Total Payable",
-                mora_note: "EMI repayment begins after month",
-                
-                // Locator
-                loc_title: "Geo-Spatial Partner Locator", loc_sub: "Find eligible SCAs, PSBs, and RRBs with healthy fund utilization.",
-                lbl_search: "Enter Pincode / District", btn_search: "Search Partners",
-                tag_good: "High Fund Capacity", tag_npa: "High NPA / Excluded",
-                dist: "km away",
-                
-                // Tracker
-                trk_title: "Application Status", trk_sub: "Track your loan disbursement stages offline.",
-                app_id: "App ID: APP-26092", st_rev: "Under Review"
-            },
-            hi: {
-                title: "समृद्धि सेतु", tagline: "MoSJE AI चैनल फाइनेंस पोर्टल",
-                tab_reco: "योजना मिलान", tab_calc: "EMI कैलकुलेटर", tab_loc: "पार्टनर लोकेटर", tab_track: "ट्रैकर",
-                
-                // Recommender
-                rec_title: "स्मार्ट योजना अनुशंसक", rec_sub: "आपकी प्रोफ़ाइल के आधार पर सटीक क्रेडिट योजना खोजने के लिए AI इंजन।",
-                lbl_purpose: "परियोजना का उद्देश्य", opt_micro: "सूक्ष्म व्यवसाय (टेलरिंग, किराना)", opt_term: "बड़ी परियोजना (विनिर्माण)", opt_edu: "उच्च शिक्षा",
-                lbl_cost: "अनुमानित लागत (₹)", lbl_income: "वार्षिक पारिवारिक आय (₹)", lbl_cat: "श्रेणी", opt_sc: "अनुसूचित जाति (SC)", opt_other: "अन्य",
-                btn_voice: "बोलने के लिए टैप करें (डेमो)", btn_find: "पात्र योजनाएं खोजें",
-                res_match: "सर्वश्रेष्ठ मिलान",
-                scheme_micro: "सूक्ष्म वित्त योजना", desc_micro: "छोटे व्यवसायों के लिए ₹1.40 लाख तक।",
-                scheme_term: "सावधि ऋण योजना", desc_term: "बड़े प्रोजेक्ट्स के लिए ₹50 लाख तक।",
-                scheme_edu: "शिक्षा ऋण", desc_edu: "कोर्स लागत का 90% तक।",
-                
-                // Calculator
-                cal_title: "वित्तीय कैलकुलेटर", cal_sub: "डायनामिक EMI, अधिस्थगन, और ब्याज अनुमान उपकरण।",
-                btn_sync: "मिलान से सिंक करें", sync_msg: "सूक्ष्म वित्त सेटिंग्स के साथ सिंक किया गया",
-                lbl_loan_amt: "ऋण राशि", lbl_tenure: "चुकौती अवधि", lbl_mora: "अधिस्थगन अवधि (Moratorium)",
-                lbl_rate: "ब्याज दर (वार्षिक)", txt_months: "महीने",
-                res_emi: "मासिक EMI", res_princ: "मूलधन", res_int: "कुल ब्याज", res_total: "कुल देय राशि",
-                mora_note: "EMI का भुगतान महीने के बाद शुरू होता है:",
-                
-                // Locator
-                loc_title: "जियो-स्पेशियल पार्टनर लोकेटर", loc_sub: "स्वस्थ फंड उपयोग के साथ पात्र SCA, PSB और RRB खोजें।",
-                lbl_search: "पिनकोड / जिला दर्ज करें", btn_search: "पार्टनर खोजें",
-                tag_good: "उच्च फंड क्षमता", tag_npa: "उच्च NPA / बाहर रखा गया",
-                dist: "किमी दूर",
-                
-                // Tracker
-                trk_title: "आवेदन की स्थिति", trk_sub: "अपने ऋण वितरण चरणों को ट्रैक करें।",
-                app_id: "आवेदन ID: APP-26092", st_rev: "समीक्षाधीन"
-            }
-        };
+const i18n = {
+en:{
+  title:"SamriddhiSetu", tagline:"MoSJE AI Channel Finance Portal",
+  tab_reco:"Scheme Assistant", tab_calc:"EMI Calculator", tab_loc:"Partner Locator", tab_doc:"Document Verify", tab_track:"Tracker",
+  orb_label:"Tap the circle to talk to Bhashini", orb_sub:"Speak naturally in Hindi or English about your financing needs.",
+  mic_idle:"Tap to speak", mic_listen:"Listening…", mic_done:"Captured",
+  chat_placeholder:"Type your message…",
+  ask_more_label:"Chat with AI", ask_more_ph:"e.g. Need business loan...",
+  seed_bot:"Namaste! Tell me what you need money for, how much it will cost, and your family's yearly income — in your own words. I will find the right MoSJE scheme for you.",
+  collapse:"Back to Form",
+  form_head:"Fill details manually", form_sub:"Or use the AI assistant to automatically detect this.",
+  lbl_purpose:"Project Purpose", opt_micro:"Micro Business (Tailoring, Kirana)", opt_term:"Large Project (Manufacturing)", opt_edu:"Higher Education",
+  lbl_cost:"Estimated Project Cost (₹)", lbl_income:"Annual Family Income (₹)", lbl_cat:"Category", opt_sc:"Scheduled Caste (SC)", opt_other:"Other",
+  btn_find:"Evaluate Scheme",
+  res_match:"Best Match", res_empty_title:"Awaiting Information", res_empty_sub:"Your matched scheme will appear here.",
+  scheme_micro:"Micro Finance Scheme", desc_micro:"Up to ₹1.40 Lakh for small business setups.",
+  scheme_term:"Term Loan Scheme", desc_term:"Up to ₹50 Lakh for larger projects (DPR required).",
+  scheme_edu:"Educational Loan Scheme", desc_edu:"Up to 90% of course cost.",
+  btn_calc:"Calculate EMI", btn_partner:"Route to Partner",
+  cal_title:"Financial Calculator", cal_sub:"EMI, moratorium and interest — mapped to scheme constraints.",
+  btn_sync:"Sync from Assistant", sync_msg:"Synced with matched scheme settings",
+  lbl_loan_amt:"Loan Amount Requested", lbl_tenure:"Repayment Tenure", lbl_mora:"Moratorium Period", lbl_rate:"Interest Rate (p.a.)", txt_months:"Months",
+  res_emi:"Monthly EMI", res_princ:"Principal", res_int:"Total Interest", res_total:"Total Payable",
+  mora_note:"EMI repayment begins after month",
+  loc_title:"Smart Partner Locator", loc_sub:"Nearest SCA / PSB / NBFC-MFI — filtered by live fund utilization & NPA status.",
+  lbl_search:"Enter Pincode / District", tag_good:"Sufficient Funds", tag_npa:"High NPA (Restricted)", dist:"km away",
+  doc_title:"Digital Document Verification", doc_sub:"Retrieve verified e-KYC documents via DigiLocker.",
+  doc_connect:"Connect DigiLocker", doc_connected:"DigiLocker Connected", doc_fetch:"Fetch & Verify",
+  doc_pan:"PAN Card", doc_aadhaar:"Aadhaar (e-KYC)", doc_caste:"Caste Certificate", doc_income:"Income Certificate",
+  doc_status_pending:"Not fetched", doc_status_done:"Verified",
+  trk_title:"Application Status", trk_sub:"Track your loan disbursement stages in real time.",
+  app_id:"App ID: APP-26092", st_rev:"Under Review",
+  ts_sub:"Submitted", ts_sub_desc:"Paperless submission via DigiLocker.",
+  ts_rev:"Under Review", ts_rev_desc:"SCA verifying project feasibility.",
+  ts_sanc:"Sanctioned", ts_sanc_desc:"Loan approved by channel partner.",
+  ts_disb:"Disbursed", ts_disb_desc:"DBT transfer to beneficiary account."
+},
+hi:{
+  title:"समृद्धि सेतु", tagline:"MoSJE AI चैनल फाइनेंस पोर्टल",
+  tab_reco:"योजना सहायक", tab_calc:"EMI कैलकुलेटर", tab_loc:"पार्टनर लोकेटर", tab_doc:"दस्तावेज़ सत्यापन", tab_track:"ट्रैकर",
+  orb_label:"भाषिणी से बात करने के लिए टैप करें", orb_sub:"अपनी फंडिंग आवश्यकताओं के बारे में स्वाभाविक रूप से बोलें।",
+  mic_idle:"बोलने के लिए टैप करें", mic_listen:"सुन रहा हूँ…", mic_done:"रिकॉर्ड हो गया",
+  chat_placeholder:"अपना संदेश टाइप करें…",
+  ask_more_label:"AI से चैट करें", ask_more_ph:"जैसे: मुझे व्यापार ऋण चाहिए...",
+  seed_bot:"नमस्ते! अपनी भाषा में बताएं — आपको पैसे किस काम के लिए चाहिए, कितनी लागत है, और परिवार की सालाना आय क्या है। मैं आपके लिए सही योजना खोजूंगा।",
+  collapse:"वापस फॉर्म पर जाएं",
+  form_head:"मैन्युअल रूप से विवरण भरें", form_sub:"या इसे स्वचालित रूप से खोजने के लिए AI सहायक का उपयोग करें।",
+  lbl_purpose:"परियोजना का उद्देश्य", opt_micro:"सूक्ष्म व्यवसाय (टेलरिंग, किराना)", opt_term:"बड़ी परियोजना (विनिर्माण)", opt_edu:"उच्च शिक्षा",
+  lbl_cost:"अनुमानित परियोजना लागत (₹)", lbl_income:"वार्षिक पारिवारिक आय (₹)", lbl_cat:"श्रेणी", opt_sc:"अनुसूचित जाति (SC)", opt_other:"अन्य",
+  btn_find:"योजना का मूल्यांकन करें",
+  res_match:"सर्वश्रेष्ठ मिलान", res_empty_title:"जानकारी की प्रतीक्षा है", res_empty_sub:"आपकी मिलान योजना यहाँ दिखेगी।",
+  scheme_micro:"सूक्ष्म वित्त योजना", desc_micro:"छोटे व्यवसायों के लिए ₹1.40 लाख तक।",
+  scheme_term:"सावधि ऋण योजना", desc_term:"बड़े प्रोजेक्ट्स के लिए ₹50 लाख तक।",
+  scheme_edu:"शिक्षा ऋण योजना", desc_edu:"कोर्स लागत का 90% तक।",
+  btn_calc:"EMI कैलकुलेट करें", btn_partner:"पार्टनर खोजें",
+  cal_title:"वित्तीय कैलकुलेटर", cal_sub:"EMI, मोरेटोरियम और ब्याज — योजना की सीमाओं के आधार पर।",
+  btn_sync:"सहायक से सिंक करें", sync_msg:"मिलान योजना सेटिंग्स के साथ सिंक किया गया",
+  lbl_loan_amt:"ऋण राशि", lbl_tenure:"चुकौती अवधि", lbl_mora:"अधिस्थगन अवधि", lbl_rate:"ब्याज दर (वार्षिक)", txt_months:"महीने",
+  res_emi:"मासिक EMI", res_princ:"मूलधन", res_int:"कुल ब्याज", res_total:"कुल देय राशि",
+  mora_note:"EMI का भुगतान महीने के बाद शुरू होता है:",
+  loc_title:"स्मार्ट पार्टनर लोकेटर", loc_sub:"निकटतम SCA / PSB / NBFC-MFI — फंड उपयोग और NPA स्थिति द्वारा फ़िल्टर किया गया।",
+  lbl_search:"पिनकोड / जिला दर्ज करें", tag_good:"पर्याप्त फंड", tag_npa:"उच्च NPA (प्रतिबंधित)", dist:"किमी दूर",
+  doc_title:"डिजिटल दस्तावेज़ सत्यापन", doc_sub:"DigiLocker के माध्यम से सत्यापित दस्तावेज़ प्राप्त करें।",
+  doc_connect:"DigiLocker कनेक्ट करें", doc_connected:"DigiLocker कनेक्टेड", doc_fetch:"प्राप्त करें और सत्यापित करें",
+  doc_pan:"पैन कार्ड", doc_aadhaar:"आधार (e-KYC)", doc_caste:"जाति प्रमाण पत्र", doc_income:"आय प्रमाण पत्र",
+  doc_status_pending:"प्राप्त नहीं हुआ", doc_status_done:"सत्यापित",
+  trk_title:"आवेदन की स्थिति", trk_sub:"अपने ऋण वितरण चरणों को वास्तविक समय में ट्रैक करें।",
+  app_id:"आवेदन ID: APP-26092", st_rev:"समीक्षाधीन",
+  ts_sub:"जमा किया गया", ts_sub_desc:"DigiLocker के माध्यम से पेपरलेस सबमिशन।",
+  ts_rev:"समीक्षाधीन", ts_rev_desc:"SCA परियोजना व्यवहार्यता की पुष्टि कर रहा है।",
+  ts_sanc:"स्वीकृत", ts_sanc_desc:"चैनल पार्टनर द्वारा ऋण स्वीकृत।",
+  ts_disb:"वितरित", ts_disb_desc:"लाभार्थी खाते में DBT ट्रांसफर।"
+}
+};
 
-        function setLanguage(lang) {
-            AppState.lang = lang;
-            document.body.classList.toggle('font-hi', lang === 'hi');
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (i18n[lang][key]) {
-                    if (el.tagName === 'INPUT' && el.type === 'button') el.value = i18n[lang][key];
-                    else el.innerHTML = i18n[lang][key];
-                }
-            });
-            const toggle = document.getElementById('langToggle');
-            if (lang === 'hi') toggle.classList.add('hi');
-            else toggle.classList.remove('hi');
-            
-            updateCalcUI(); // Refresh dynamic calculator strings
-        }
+const Suggestions = {
+  purpose: { en: ["Tailoring Shop", "Higher Education", "Manufacturing Unit"], hi: ["टेलरिंग की दुकान", "उच्च शिक्षा", "मैन्युफैक्चरिंग यूनिट"] },
+  cost: { en: ["₹80,000", "₹1,50,000", "₹5,00,000"], hi: ["₹80,000", "₹1,50,000", "₹5,00,000"] },
+  income: { en: ["₹1,20,000", "₹2,50,000", "₹4,00,000"], hi: ["₹1,20,000", "₹2,50,000", "₹4,00,000"] },
+};
 
-        function toggleLang() {
-            setLanguage(AppState.lang === 'en' ? 'hi' : 'en');
-        }
-    </script>
+function setLanguage(lang){
+  AppState.lang = lang;
+  document.body.classList.toggle('font-hi', lang==='hi');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(i18n[lang][key]) el.innerHTML = i18n[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if(i18n[lang][key]) el.setAttribute('placeholder', i18n[lang][key]);
+  });
+  document.getElementById('langToggle').classList.toggle('hi', lang==='hi');
+  updateQuickReplies();
+  updateCalcUI();
+}
+function toggleLang(){ setLanguage(AppState.lang==='en' ? 'hi' : 'en'); }
+</script>
 
-    <!-- Header -->
-    <header class="bg-navy-900 text-white sticky top-0 z-50 shadow-lg border-b-4 border-brand-500">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-saffron-500 to-brand-500 flex items-center justify-center font-bold text-2xl shadow-inner border border-white/20">S</div>
-                <div>
-                    <h1 class="font-bold text-xl leading-tight tracking-tight" data-i18n="title">SamriddhiSetu</h1>
-                    <p class="text-xs text-slate-300 font-medium" data-i18n="tagline">MoSJE AI Channel Finance Portal</p>
-                </div>
+<!-- Header -->
+<header class="bg-navy-900 text-white sticky top-0 z-50 shadow-lg border-b-4 border-brand-500">
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex justify-between items-center gap-2">
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-saffron-500 to-brand-500 flex items-center justify-center font-bold text-lg sm:text-2xl shadow-inner border border-white/20 shrink-0">S</div>
+      <div class="min-w-0">
+        <h1 class="font-bold text-base sm:text-xl leading-tight tracking-tight truncate" data-i18n="title">SamriddhiSetu</h1>
+        <p class="text-[10px] sm:text-xs text-slate-300 font-medium truncate" data-i18n="tagline">MoSJE AI Channel Finance Portal</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 sm:gap-6 shrink-0">
+      <span class="hidden md:inline-flex bg-slate-800 text-xs text-brand-400 px-3 py-1 rounded-full border border-slate-700 font-bold tracking-wide">SIH26092</span>
+      <div id="langToggle" class="lang-toggle" onclick="toggleLang()">
+        <div class="slider shadow-sm"></div>
+        <div class="lang-text">EN</div>
+        <div class="lang-text">HI</div>
+      </div>
+    </div>
+  </div>
+  <div class="bg-slate-800 border-t border-slate-700 overflow-x-auto no-scrollbar">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 flex min-w-max">
+      <button onclick="switchTab('recommender')" id="nav-recommender" class="tab-btn px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-white border-b-2 border-brand-500 bg-slate-700 flex items-center gap-2 whitespace-nowrap">
+        <i class="fas fa-microphone-lines text-brand-400"></i> <span data-i18n="tab_reco">Scheme Assistant</span>
+      </button>
+      <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 flex items-center gap-2 whitespace-nowrap">
+        <i class="fas fa-calculator text-saffron-400"></i> <span data-i18n="tab_calc">EMI Calculator</span>
+      </button>
+      <button onclick="switchTab('locator')" id="nav-locator" class="tab-btn px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 flex items-center gap-2 whitespace-nowrap">
+        <i class="fas fa-map-location-dot text-blue-400"></i> <span data-i18n="tab_loc">Partner Locator</span>
+      </button>
+      <button onclick="switchTab('docverify')" id="nav-docverify" class="tab-btn px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 flex items-center gap-2 whitespace-nowrap">
+        <i class="fas fa-lock text-indigo-400"></i> <span data-i18n="tab_doc">Document Verify</span>
+      </button>
+      <button onclick="switchTab('tracker')" id="nav-tracker" class="tab-btn px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 flex items-center gap-2 whitespace-nowrap">
+        <i class="fas fa-list-check text-purple-400"></i> <span data-i18n="tab_track">Tracker</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="flex-grow w-full max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8 relative">
+
+  <!-- ============ TAB 1: SCHEME ASSISTANT ============ -->
+  <section id="tab-recommender" class="tab-content active">
+
+    <!-- COLLAPSED STATE: Orb (left) + Form (right) -->
+    <div id="assistant-collapsed" class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+      <!-- Left: Voice Orb -->
+      <div class="lg:col-span-5 flex flex-col justify-center">
+        <div class="glass-panel rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center h-full min-h-[350px]">
+          <div id="voice-orb-main" class="voice-orb mb-5" onclick="triggerVoiceFlow()">
+            <i class="fas fa-microphone"></i>
+          </div>
+          <h3 class="font-bold text-navy-900 text-lg sm:text-xl" data-i18n="orb_label">Tap the circle to talk to Bhashini</h3>
+          <p class="text-slate-500 text-sm mt-2" data-i18n="orb_sub">Speak naturally in Hindi or English about your financing needs.</p>
+        </div>
+      </div>
+
+      <!-- Right: Manual Form -->
+      <div class="lg:col-span-7">
+        <div class="glass-panel rounded-2xl p-6 h-full">
+          <h3 class="font-bold text-navy-900 text-base" data-i18n="form_head">Fill details manually</h3>
+          <p class="text-slate-500 text-xs mt-1 mb-4" data-i18n="form_sub">Or use the AI assistant to automatically detect this.</p>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_purpose">Project Purpose</label>
+              <select id="inp-purpose" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <option value="micro" data-i18n="opt_micro">Micro Business (Tailoring, Kirana)</option>
+                <option value="term" data-i18n="opt_term">Large Project (Manufacturing)</option>
+                <option value="edu" data-i18n="opt_edu">Higher Education</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_cost">Estimated Cost (₹)</label>
+                <input type="number" id="inp-cost" placeholder="80000" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_income">Annual Income (₹)</label>
+                <input type="number" id="inp-income" placeholder="200000" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
             </div>
             
-            <div class="flex items-center gap-6">
-                <span class="hidden md:inline-flex bg-slate-800 text-xs text-brand-400 px-3 py-1 rounded-full border border-slate-700 font-bold tracking-wide">SIH26092</span>
-                <!-- Custom Lang Toggle -->
-                <div id="langToggle" class="lang-toggle" onclick="toggleLang()">
-                    <div class="slider shadow-sm"></div>
-                    <div class="lang-text">EN</div>
-                    <div class="lang-text">HI</div>
-                </div>
+            <button onclick="submitManualForm()" class="w-full bg-navy-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-lg mt-2 transition-all text-sm">
+              <span data-i18n="btn_find">Evaluate Scheme</span> <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+
+            <!-- Ask Assistant Quick Bar -->
+            <div class="pt-4 border-t border-slate-200 mt-4">
+              <label class="block text-xs font-bold text-slate-500 mb-1.5" data-i18n="ask_more_label">Chat with AI</label>
+              <div class="flex items-center gap-2">
+                <input id="ask-more-input" type="text" data-i18n-ph="ask_more_ph" placeholder="e.g. Need business loan..."
+                       class="flex-grow bg-slate-50 border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                       onfocus="expandAssistant()" onkeydown="if(event.key==='Enter'){askMoreFromForm();}">
+                <button onclick="expandAssistant()" class="shrink-0 w-10 h-10 rounded-full bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center shadow transition">
+                  <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPANDED STATE: Full Width Chat + Dynamic Result Panel -->
+    <div id="assistant-expanded" class="hidden">
+      <div class="glass-panel rounded-2xl p-4 sm:p-6 w-full shadow-xl border border-slate-200/60">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow"><i class="fas fa-robot"></i></div>
+            <div>
+              <h3 class="font-bold text-navy-900 text-sm sm:text-base">Samriddhi AI Assistant</h3>
+              <p class="text-[10px] text-brand-600 font-bold uppercase tracking-wide">Powered by Bhashini</p>
+            </div>
+          </div>
+          <button onclick="collapseAssistant()" class="text-xs font-bold text-slate-500 hover:text-navy-900 flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-full transition shadow-sm">
+            <i class="fas fa-chevron-left"></i> <span data-i18n="collapse">Back to Form</span>
+          </button>
         </div>
 
-        <!-- Main Tab Navigation -->
-        <div class="bg-slate-800 border-t border-slate-700 overflow-x-auto no-scrollbar">
-            <div class="max-w-7xl mx-auto px-4 flex min-w-max">
-                <button onclick="switchTab('recommender')" id="nav-recommender" class="tab-btn px-6 py-4 text-sm font-bold text-white border-b-2 border-brand-500 bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fas fa-wand-magic-sparkles text-brand-400"></i> <span data-i18n="tab_reco">Scheme Matcher</span>
-                </button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-6 py-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2">
-                    <i class="fas fa-calculator text-saffron-400"></i> <span data-i18n="tab_calc">EMI Calculator</span>
-                </button>
-                <button onclick="switchTab('locator')" id="nav-locator" class="tab-btn px-6 py-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2">
-                    <i class="fas fa-map-location-dot text-blue-400"></i> <span data-i18n="tab_loc">Partner Locator</span>
-                </button>
-                <button onclick="switchTab('tracker')" id="nav-tracker" class="tab-btn px-6 py-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2">
-                    <i class="fas fa-list-check text-purple-400"></i> <span data-i18n="tab_track">Tracker</span>
-                </button>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Chat Window -->
+          <div id="chat-col" class="col-span-1 lg:col-span-12 transition-all duration-500">
+            <div id="chat-window" class="chat-scroll flex flex-col overflow-y-auto space-y-3 pr-1 mb-4 bg-slate-50/60 rounded-xl p-3 sm:p-4 border border-slate-100" style="height:55vh; min-height:350px;"></div>
+
+            <!-- Dynamic Suggestions -->
+            <div id="quick-replies" class="flex flex-wrap gap-2 mb-3 min-h-[32px]">
+              <!-- Populated by JS -->
             </div>
+
+            <!-- Input Bar -->
+            <div class="flex items-center gap-2">
+              <button id="btn-voice-inline" onclick="triggerVoiceFlow()" class="shrink-0 w-12 h-12 rounded-full bg-navy-900 text-white flex items-center justify-center shadow-lg hover:bg-black transition">
+                <i class="fas fa-microphone"></i>
+              </button>
+              <input id="chat-input" type="text" data-i18n-ph="chat_placeholder" placeholder="Type your message…"
+                     class="flex-grow bg-white border border-slate-300 rounded-full px-5 py-3.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none shadow-sm"
+                     onkeydown="if(event.key==='Enter'){sendChatText();}">
+              <button onclick="sendChatText()" class="shrink-0 w-12 h-12 rounded-full bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center shadow-lg transition">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            <p id="mic-status" class="text-[11px] text-slate-400 mt-2 text-center font-bold uppercase tracking-wider" data-i18n="mic_idle">Tap to speak</p>
+          </div>
+
+          <!-- Right: Scheme Results (Hidden until data is captured) -->
+          <div id="result-col" class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-slate-200 pt-6 lg:pt-0 lg:pl-6">
+            <h3 class="font-bold text-navy-900 mb-4 flex items-center gap-2"><i class="fas fa-clipboard-check text-brand-500"></i> Eligibility Result</h3>
+            
+            <div class="bg-white rounded-2xl p-5 sm:p-6 border-l-4 border-l-brand-500 relative overflow-hidden shadow-lg border border-slate-100">
+              <div class="absolute top-0 right-0 bg-brand-100 text-brand-700 text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wide" data-i18n="res_match">Best Match</div>
+              
+              <h3 id="res-title" class="text-xl font-bold text-navy-900 pr-16" data-i18n="scheme_micro">Micro Finance Scheme</h3>
+              <p id="res-desc" class="text-slate-500 text-sm mt-2 mb-5 font-medium" data-i18n="desc_micro">Up to ₹1.40 Lakh for small business setups.</p>
+              
+              <div class="flex flex-wrap gap-2 mb-6">
+                <span class="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-2 rounded-lg border border-brand-200"><i class="fas fa-percent mr-1"></i> <span id="res-rate">6.5%</span> p.a.</span>
+                <span class="bg-saffron-50 text-saffron-700 text-xs font-bold px-3 py-2 rounded-lg border border-saffron-200"><i class="fas fa-pause-circle mr-1"></i> <span id="res-mora">3</span>m Moratorium</span>
+              </div>
+              
+              <div class="flex flex-col gap-3">
+                <button onclick="selectSchemeAndJump('calculator')" class="bg-navy-900 hover:bg-black text-white font-bold py-3 rounded-xl text-sm shadow-md transition">
+                  <i class="fas fa-calculator mr-2"></i> <span data-i18n="btn_calc">Calculate EMI</span>
+                </button>
+                <button onclick="selectSchemeAndJump('locator')" class="bg-white border-2 border-brand-500 text-brand-700 hover:bg-brand-50 font-bold py-3 rounded-xl text-sm transition">
+                  <i class="fas fa-route mr-2"></i> <span data-i18n="btn_partner">Route to Partner</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
-    </header>
+      </div>
+    </div>
+  </section>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 relative">
 
-        <!-- ================= TAB 1: SCHEME RECOMMENDER ================= -->
-        <section id="tab-recommender" class="tab-content active">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <!-- Left Input Panel -->
-                <div class="lg:col-span-5 space-y-6">
-                    <div class="glass-panel rounded-2xl p-6">
-                        <div class="mb-6">
-                            <h2 class="text-2xl font-bold text-navy-900" data-i18n="rec_title">Smart Scheme Recommender</h2>
-                            <p class="text-slate-500 text-sm mt-1" data-i18n="rec_sub">AI-driven engine to find the exact credit scheme based on your profile.</p>
-                        </div>
-
-                        <!-- Voice Mock -->
-                        <div class="bg-brand-50 border border-brand-200 rounded-xl p-4 mb-6 flex flex-col items-center justify-center text-center">
-                            <button id="btn-voice" onclick="mockVoiceInput()" class="bg-white text-slate-700 border border-slate-300 shadow-sm rounded-full px-6 py-2.5 font-bold text-sm flex items-center gap-2 hover:border-brand-500 transition-all">
-                                <i class="fas fa-microphone text-brand-600"></i> <span data-i18n="btn_voice">Tap to Speak (Demo)</span>
-                            </button>
-                            <p class="text-xs text-slate-500 mt-3 font-medium">"मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए"</p>
-                        </div>
-
-                        <!-- Form -->
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_purpose">Project Purpose</label>
-                                <select id="inp-purpose" class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                                    <option value="micro" data-i18n="opt_micro">Micro Business (Tailoring, Kirana)</option>
-                                    <option value="term" data-i18n="opt_term">Large Project (Manufacturing)</option>
-                                    <option value="edu" data-i18n="opt_edu">Higher Education</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_cost">Estimated Cost (₹)</label>
-                                <input type="number" id="inp-cost" placeholder="50000" class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_income">Annual Income (₹)</label>
-                                    <input type="number" value="180000" class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-1" data-i18n="lbl_cat">Category</label>
-                                    <select class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                                        <option data-i18n="opt_sc">SC</option>
-                                        <option data-i18n="opt_other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <button onclick="runRuleEngine()" class="w-full bg-navy-900 hover:bg-black text-white font-bold py-3.5 rounded-xl shadow-lg mt-4 transition-all">
-                                <span data-i18n="btn_find">Find Eligible Schemes</span> <i class="fas fa-arrow-right ml-2"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Results Panel -->
-                <div class="lg:col-span-7">
-                    <div id="reco-results" class="hidden space-y-4">
-                        <!-- Primary Match -->
-                        <div class="glass-panel rounded-2xl p-6 border-l-4 border-l-brand-500 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 bg-brand-100 text-brand-700 text-xs font-bold px-3 py-1 rounded-bl-lg" data-i18n="res_match">Best Match</div>
-                            <h3 id="res-title-1" class="text-xl font-bold text-navy-900" data-i18n="scheme_micro">Micro Finance Scheme</h3>
-                            <p id="res-desc-1" class="text-slate-500 text-sm mt-1 mb-4" data-i18n="desc_micro">Up to ₹1.40 Lakh for small business setups.</p>
-                            
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200"><i class="fas fa-percent text-brand-500 mr-1"></i> <span id="res-rate">6.5%</span> p.a.</span>
-                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200"><i class="fas fa-calendar-alt text-brand-500 mr-1"></i> Max 5 Yrs</span>
-                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200"><i class="fas fa-pause-circle text-brand-500 mr-1"></i> 3m Moratorium</span>
-                            </div>
-                            
-                            <div class="flex gap-3">
-                                <button onclick="selectSchemeAndJump('calculator')" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-lg transition-colors text-sm shadow-md">
-                                    <i class="fas fa-calculator mr-1"></i> Calculate EMI
-                                </button>
-                                <button onclick="selectSchemeAndJump('locator')" class="flex-1 bg-white border border-brand-500 text-brand-700 hover:bg-brand-50 font-bold py-2.5 rounded-lg transition-colors text-sm">
-                                    <i class="fas fa-map-marker-alt mr-1"></i> Find Channel Partner
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Secondary Option -->
-                        <div class="glass-panel rounded-2xl p-6 opacity-75 grayscale hover:grayscale-0 transition-all border border-slate-200">
-                            <h3 class="text-lg font-bold text-slate-700" data-i18n="scheme_term">Term Loan Scheme</h3>
-                            <p class="text-slate-500 text-sm mt-1" data-i18n="desc_term">Up to ₹50 Lakh for larger projects (DPR required).</p>
-                        </div>
-                    </div>
-                    
-                    <div id="reco-empty" class="h-full min-h-[400px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                        <i class="fas fa-clipboard-list text-4xl mb-3"></i>
-                        <p class="font-medium">Fill details to see matched schemes</p>
-                    </div>
-                </div>
+  <!-- ============ TAB 2: FINANCIAL CALCULATOR ============ -->
+  <section id="tab-calculator" class="tab-content">
+    <div class="glass-panel rounded-3xl overflow-hidden shadow-lg border border-white max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2">
+        <div class="p-6 sm:p-8 bg-white">
+          <div class="flex justify-between items-start mb-6 gap-3 flex-wrap">
+            <div>
+              <h2 class="text-xl sm:text-2xl font-bold text-navy-900" data-i18n="cal_title">Financial Calculator</h2>
+              <p class="text-sm text-slate-500 mt-1" data-i18n="cal_sub">EMI, moratorium and interest — mapped to scheme constraints.</p>
             </div>
-        </section>
+            <button id="btn-sync" onclick="syncFromRecommender()" class="hidden shrink-0 bg-saffron-50 text-saffron-600 border border-saffron-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-saffron-100 transition flex items-center gap-1">
+              <i class="fas fa-rotate"></i> <span data-i18n="btn_sync">Sync from Assistant</span>
+            </button>
+          </div>
+          <div id="sync-msg" class="hidden mb-6 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-2 rounded-lg border border-brand-200 flex items-center gap-2">
+            <i class="fas fa-check-circle"></i> <span data-i18n="sync_msg">Synced with matched scheme settings</span>
+          </div>
 
-
-        <!-- ================= TAB 2: FINANCIAL CALCULATOR ================= -->
-        <section id="tab-calculator" class="tab-content">
-            <div class="glass-panel rounded-3xl overflow-hidden shadow-lg border border-white max-w-5xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2">
-                    
-                    <!-- Controls -->
-                    <div class="p-8 bg-white">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h2 class="text-2xl font-bold text-navy-900" data-i18n="cal_title">Financial Calculator</h2>
-                                <p class="text-sm text-slate-500" data-i18n="cal_sub">Dynamic EMI, Moratorium, and Interest projection.</p>
-                            </div>
-                            <button id="btn-sync" onclick="syncFromRecommender()" class="hidden bg-saffron-50 text-saffron-600 border border-saffron-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-saffron-100 transition flex items-center gap-1">
-                                <i class="fas fa-rotate"></i> <span data-i18n="btn_sync">Sync from Matcher</span>
-                            </button>
-                        </div>
-                        
-                        <div id="sync-msg" class="hidden mb-6 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-2 rounded-lg border border-brand-200 flex items-center gap-2">
-                            <i class="fas fa-check-circle"></i> <span data-i18n="sync_msg">Synced with Micro Finance settings</span>
-                        </div>
-
-                        <div class="space-y-8">
-                            <!-- Loan Amount -->
-                            <div>
-                                <div class="flex justify-between mb-2">
-                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_loan_amt">Loan Amount</label>
-                                    <span class="font-bold text-brand-600 text-lg" id="val-loan">₹80,000</span>
-                                </div>
-                                <input type="range" id="calc-loan" min="10000" max="140000" step="1000" value="80000" oninput="updateCalcUI()">
-                            </div>
-
-                            <!-- Tenure -->
-                            <div>
-                                <div class="flex justify-between mb-2">
-                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_tenure">Repayment Tenure</label>
-                                    <span class="font-bold text-brand-600 text-lg"><span id="val-tenure">36</span> <span data-i18n="txt_months" class="text-sm">Months</span></span>
-                                </div>
-                                <input type="range" id="calc-tenure" min="12" max="60" step="6" value="36" oninput="updateCalcUI()">
-                            </div>
-                            
-                            <!-- Moratorium -->
-                            <div>
-                                <div class="flex justify-between mb-2">
-                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_mora">Moratorium Period</label>
-                                    <span class="font-bold text-brand-600 text-lg"><span id="val-mora">3</span> <span data-i18n="txt_months" class="text-sm">Months</span></span>
-                                </div>
-                                <input type="range" id="calc-mora" min="0" max="12" step="1" value="3" oninput="updateCalcUI()">
-                            </div>
-
-                            <!-- Interest Rate -->
-                            <div>
-                                <div class="flex justify-between mb-2">
-                                    <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_rate">Interest Rate (p.a.)</label>
-                                    <span class="font-bold text-brand-600 text-lg" id="val-rate">6.5%</span>
-                                </div>
-                                <input type="range" id="calc-rate" min="6.0" max="15.0" step="0.5" value="6.5" oninput="updateCalcUI()">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Output Panel -->
-                    <div class="bg-navy-900 p-8 text-white relative overflow-hidden flex flex-col justify-center">
-                        <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-brand-500 rounded-full opacity-20 blur-[80px]"></div>
-                        
-                        <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 mb-6 backdrop-blur-sm relative z-10">
-                            <p class="text-slate-400 text-sm font-medium mb-1" data-i18n="res_emi">Monthly EMI</p>
-                            <div class="text-4xl md:text-5xl font-bold text-brand-400 mb-2" id="out-emi">₹2,452</div>
-                            <p class="text-xs text-saffron-400 font-medium flex items-center gap-1">
-                                <i class="fas fa-info-circle"></i> 
-                                <span data-i18n="mora_note">EMI repayment begins after month</span> <span id="out-mora-val" class="ml-1">3</span>
-                            </p>
-                        </div>
-
-                        <div class="space-y-4 relative z-10">
-                            <div class="flex justify-between items-center pb-4 border-b border-slate-700/50">
-                                <span class="text-slate-400 font-medium" data-i18n="res_princ">Principal</span>
-                                <span class="font-bold text-lg" id="out-princ">₹80,000</span>
-                            </div>
-                            <div class="flex justify-between items-center pb-4 border-b border-slate-700/50">
-                                <span class="text-slate-400 font-medium" data-i18n="res_int">Total Interest</span>
-                                <span class="font-bold text-lg text-saffron-400" id="out-int">₹8,272</span>
-                            </div>
-                            <div class="flex justify-between items-center pt-2">
-                                <span class="text-white font-bold" data-i18n="res_total">Total Payable</span>
-                                <span class="font-bold text-2xl text-white" id="out-total">₹88,272</span>
-                            </div>
-                        </div>
-                    </div>
+          <div class="space-y-7">
+            <!-- Loan amount -->
+            <div>
+              <div class="flex justify-between mb-2 items-center gap-2 flex-wrap">
+                <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_loan_amt">Loan Amount Requested</label>
+                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1">
+                  <span class="text-slate-400 text-sm">₹</span>
+                  <input type="number" id="calc-loan-num" value="80000" min="10000" max="5000000" step="1000"
+                         class="mini-num text-brand-700 text-sm" oninput="onLoanNumberInput()">
                 </div>
+              </div>
+              <input type="range" id="calc-loan" min="10000" max="140000" step="1000" value="80000" oninput="onLoanSliderInput()">
             </div>
-        </section>
 
-
-        <!-- ================= TAB 3: PARTNER LOCATOR ================= -->
-        <section id="tab-locator" class="tab-content">
-            <div class="glass-panel rounded-2xl p-6 max-w-6xl mx-auto border-t-4 border-t-blue-500 shadow-lg">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-navy-900" data-i18n="loc_title">Geo-Spatial Partner Locator</h2>
-                        <p class="text-slate-500 text-sm" data-i18n="loc_sub">Find eligible SCAs, PSBs, and RRBs with healthy fund utilization.</p>
-                    </div>
-                    
-                    <div class="flex w-full md:w-auto bg-white rounded-lg border border-slate-300 p-1 shadow-sm">
-                        <input type="text" placeholder="Pincode / District" class="bg-transparent px-4 py-2 outline-none text-sm w-full md:w-48 font-medium text-slate-700" data-i18n="lbl_search">
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+            <!-- Tenure -->
+            <div>
+              <div class="flex justify-between mb-2 items-center gap-2 flex-wrap">
+                <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_tenure">Repayment Tenure</label>
+                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1">
+                  <input type="number" id="calc-tenure-num" value="36" min="12" max="120" step="1"
+                         class="mini-num text-brand-700 text-sm" oninput="onTenureNumberInput()">
+                  <span class="text-slate-400 text-xs" data-i18n="txt_months">Months</span>
                 </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Map Mock -->
-                    <div class="lg:col-span-2 bg-slate-200 rounded-xl h-[400px] relative overflow-hidden border border-slate-300 shadow-inner">
-                        <!-- Map Grid Background -->
-                        <div class="absolute inset-0" style="background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 30px 30px;"></div>
-                        
-                        <!-- Route Line SVG -->
-                        <svg class="absolute inset-0 w-full h-full">
-                            <path d="M 200 200 Q 300 150 400 250" stroke="#3b82f6" stroke-width="4" stroke-dasharray="8,8" fill="none" class="opacity-70"/>
-                        </svg>
-
-                        <!-- User Pin -->
-                        <div class="absolute top-[180px] left-[180px] flex flex-col items-center">
-                            <div class="w-5 h-5 bg-navy-900 rounded-full border-2 border-white shadow-lg relative">
-                                <div class="absolute inset-0 bg-navy-900 rounded-full animate-ping opacity-50"></div>
-                            </div>
-                            <span class="mt-1 bg-white px-2 py-0.5 rounded text-[10px] font-bold shadow text-slate-700">You</span>
-                        </div>
-
-                        <!-- Partner Pin 1 (Eligible) -->
-                        <div class="absolute top-[230px] left-[380px] flex flex-col items-center cursor-pointer transform hover:scale-110 transition">
-                            <div class="w-8 h-8 bg-brand-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white">
-                                <i class="fas fa-building text-sm"></i>
-                            </div>
-                            <span class="mt-1 bg-white border border-brand-200 px-2 py-0.5 rounded text-xs font-bold shadow text-brand-700">UP SC/ST Corp (SCA)</span>
-                        </div>
-
-                        <!-- Partner Pin 2 (Flagged) -->
-                        <div class="absolute top-[100px] left-[300px] flex flex-col items-center opacity-60">
-                            <div class="w-6 h-6 bg-slate-500 rounded-full border-2 border-white shadow flex items-center justify-center text-white">
-                                <i class="fas fa-building text-[10px]"></i>
-                            </div>
-                            <span class="mt-1 bg-white px-2 py-0.5 rounded text-[10px] font-bold shadow text-slate-500">NBFC-MFI</span>
-                        </div>
-                    </div>
-
-                    <!-- List -->
-                    <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col gap-3 overflow-y-auto max-h-[400px]">
-                        <!-- Card 1 -->
-                        <div class="border-2 border-brand-500 bg-brand-50 rounded-xl p-4 cursor-pointer relative">
-                            <div class="absolute top-0 right-0 bg-brand-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">Closest</div>
-                            <h4 class="font-bold text-navy-900 text-sm">UP SC/ST Finance Corp (SCA)</h4>
-                            <p class="text-xs text-slate-500 mt-1 font-medium">Gomti Nagar • 2.4 <span data-i18n="dist">km away</span></p>
-                            <div class="mt-3 flex gap-2">
-                                <span class="bg-white border border-brand-200 text-brand-700 text-[10px] px-2 py-1 rounded font-bold"><i class="fas fa-check-circle"></i> <span data-i18n="tag_good">High Fund Capacity</span></span>
-                            </div>
-                        </div>
-
-                        <!-- Card 2 -->
-                        <div class="border border-slate-200 hover:border-slate-300 rounded-xl p-4 cursor-pointer transition">
-                            <h4 class="font-bold text-navy-900 text-sm">Lucknow Regional Rural Bank</h4>
-                            <p class="text-xs text-slate-500 mt-1 font-medium">Aliganj Branch • 4.1 <span data-i18n="dist">km away</span></p>
-                            <div class="mt-3 flex gap-2">
-                                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded font-bold">Moderate Capacity</span>
-                            </div>
-                        </div>
-
-                        <!-- Card 3 -->
-                        <div class="border border-red-200 bg-red-50/50 rounded-xl p-4 opacity-70">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-slate-700 text-sm">NBFC-MFI Center</h4>
-                                    <p class="text-xs text-slate-500 mt-1 font-medium">Hazratganj • 1.2 <span data-i18n="dist">km away</span></p>
-                                </div>
-                                <i class="fas fa-triangle-exclamation text-red-500"></i>
-                            </div>
-                            <div class="mt-3">
-                                <span class="bg-red-100 text-red-700 border border-red-200 text-[10px] px-2 py-1 rounded font-bold"><i class="fas fa-ban"></i> <span data-i18n="tag_npa">High NPA / Excluded</span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
+              <input type="range" id="calc-tenure" min="12" max="60" step="6" value="36" oninput="onTenureSliderInput()">
             </div>
-        </section>
 
-
-        <!-- ================= TAB 4: TRACKER ================= -->
-        <section id="tab-tracker" class="tab-content">
-            <div class="glass-panel rounded-2xl p-8 max-w-3xl mx-auto shadow-md border-t-4 border-t-purple-500">
-                <div class="flex justify-between items-end mb-8 border-b border-slate-200 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-navy-900" data-i18n="trk_title">Application Status</h2>
-                        <p class="text-slate-500 text-sm mt-1" data-i18n="trk_sub">Track your loan disbursement stages offline.</p>
-                    </div>
-                    <span class="bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider" data-i18n="st_rev">Under Review</span>
+            <!-- Moratorium -->
+            <div>
+              <div class="flex justify-between mb-2 items-center gap-2 flex-wrap">
+                <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_mora">Moratorium Period</label>
+                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1">
+                  <input type="number" id="calc-mora-num" value="3" min="0" max="12" step="1"
+                         class="mini-num text-brand-700 text-sm" oninput="onMoraNumberInput()">
+                  <span class="text-slate-400 text-xs" data-i18n="txt_months">Months</span>
                 </div>
-
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8 flex justify-between items-center">
-                    <span class="font-mono font-bold text-slate-700" data-i18n="app_id">App ID: APP-26092</span>
-                    <span class="text-sm font-bold text-slate-500">Micro Finance Scheme</span>
-                </div>
-
-                <!-- Timeline -->
-                <div class="relative pl-6 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                    
-                    <!-- Step 1 -->
-                    <div class="relative">
-                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-brand-500 border-4 border-white flex items-center justify-center shadow"></div>
-                        <h4 class="font-bold text-slate-800">Application Submitted</h4>
-                        <p class="text-sm text-slate-500 mt-1">Paperless submission via Bhashini & DigiLocker e-KYC.</p>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="relative">
-                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-brand-500 border-4 border-white flex items-center justify-center shadow"></div>
-                        <h4 class="font-bold text-slate-800">Routed to Partner</h4>
-                        <p class="text-sm text-slate-500 mt-1">Assigned to: UP SC/ST Finance Corp (Gomti Nagar).</p>
-                    </div>
-
-                    <!-- Step 3 (Active) -->
-                    <div class="relative">
-                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-purple-500 border-4 border-white shadow flex items-center justify-center">
-                            <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
-                        </div>
-                        <h4 class="font-bold text-purple-700">SCA Review & Physical Verification</h4>
-                        <p class="text-sm text-slate-500 mt-1">Branch manager is verifying project feasibility.</p>
-                        <span class="inline-block mt-2 bg-purple-50 text-purple-600 text-xs font-bold px-2 py-1 rounded">Est. 2-3 Days</span>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="relative opacity-40">
-                        <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-slate-300 border-4 border-white"></div>
-                        <h4 class="font-bold text-slate-800">Sanction & Disbursement</h4>
-                        <p class="text-sm text-slate-500 mt-1">DBT transfer directly to verified beneficiary account.</p>
-                    </div>
-                </div>
+              </div>
+              <input type="range" id="calc-mora" min="0" max="12" step="1" value="3" oninput="onMoraSliderInput()">
             </div>
-        </section>
 
-    </main>
+            <!-- Interest rate -->
+            <div>
+              <div class="flex justify-between mb-2 items-center gap-2 flex-wrap">
+                <label class="font-bold text-slate-700 text-sm" data-i18n="lbl_rate">Interest Rate (p.a.)</label>
+                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1">
+                  <input type="number" id="calc-rate-num" value="6.5" min="6.0" max="15.0" step="0.1"
+                         class="mini-num text-brand-700 text-sm" oninput="onRateNumberInput()">
+                  <span class="text-slate-400 text-xs">%</span>
+                </div>
+              </div>
+              <input type="range" id="calc-rate" min="6.0" max="15.0" step="0.5" value="6.5" oninput="onRateSliderInput()">
+            </div>
+          </div>
+        </div>
 
-    <!-- JS Logic -->
-    <script>
-        // Tab Navigation Logic
-        function switchTab(tabId) {
-            // Hide all contents
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-            });
-            // Show target
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+        <div class="bg-navy-900 p-6 sm:p-8 text-white relative overflow-hidden flex flex-col justify-center">
+          <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-brand-500 rounded-full opacity-20 blur-[80px]"></div>
+          <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 mb-6 backdrop-blur-sm relative z-10 shadow-lg">
+            <p class="text-slate-400 text-sm font-medium mb-1" data-i18n="res_emi">Monthly EMI</p>
+            <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-brand-400 mb-2" id="out-emi">₹2,452</div>
+            <p class="text-xs text-saffron-400 font-medium flex items-center gap-1 flex-wrap bg-slate-800 px-3 py-1.5 rounded-lg inline-flex">
+              <i class="fas fa-info-circle"></i>
+              <span data-i18n="mora_note">EMI repayment begins after month</span> <span id="out-mora-val" class="ml-1 font-bold">3</span>
+            </p>
+          </div>
+          <div class="space-y-4 relative z-10">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-700/50">
+              <span class="text-slate-400 font-medium" data-i18n="res_princ">Principal</span>
+              <span class="font-bold text-lg" id="out-princ">₹80,000</span>
+            </div>
+            <div class="flex justify-between items-center pb-4 border-b border-slate-700/50">
+              <span class="text-slate-400 font-medium" data-i18n="res_int">Total Interest</span>
+              <span class="font-bold text-lg text-saffron-400" id="out-int">₹8,272</span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+              <span class="text-white font-bold" data-i18n="res_total">Total Payable</span>
+              <span class="font-bold text-xl sm:text-2xl text-white" id="out-total">₹88,272</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            // Update Tab styling
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-slate-700', 'text-white', 'border-brand-500', 'border-saffron-400', 'border-blue-400', 'border-purple-400');
-                btn.classList.add('text-slate-400', 'border-transparent');
-            });
-            
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            activeBtn.classList.remove('text-slate-400', 'border-transparent');
-            activeBtn.classList.add('bg-slate-700', 'text-white');
-            
-            // Custom border color based on tab
-            if(tabId === 'recommender') activeBtn.classList.add('border-brand-500');
-            if(tabId === 'calculator') activeBtn.classList.add('border-saffron-400');
-            if(tabId === 'locator') activeBtn.classList.add('border-blue-400');
-            if(tabId === 'tracker') activeBtn.classList.add('border-purple-400');
 
-            // Trigger sync button visibility in calculator
-            if(tabId === 'calculator' && AppState.sharedData.recommendedScheme) {
-                document.getElementById('btn-sync').classList.remove('hidden');
-            }
-        }
+  <!-- ============ TAB 3: PARTNER LOCATOR ============ -->
+  <section id="tab-locator" class="tab-content">
+    <div class="glass-panel rounded-2xl p-4 sm:p-6 max-w-6xl mx-auto border-t-4 border-t-blue-500 shadow-lg">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-navy-900" data-i18n="loc_title">Smart Partner Locator</h2>
+          <p class="text-slate-500 text-sm mt-1" data-i18n="loc_sub">Nearest SCA / PSB / NBFC-MFI — filtered by live fund utilization & NPA status.</p>
+        </div>
+        <div class="flex w-full md:w-auto bg-white rounded-lg border border-slate-300 p-1 shadow-sm">
+          <input type="text" data-i18n-ph="lbl_search" placeholder="Pincode / District" class="bg-transparent px-4 py-2 outline-none text-sm w-full md:w-48 font-medium text-slate-700">
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
 
-        // Scheme Recommender Logic
-        function mockVoiceInput() {
-            const btn = document.getElementById('btn-voice');
-            btn.classList.add('listening');
-            if(AppState.lang === 'en') btn.innerHTML = '<i class="fas fa-microphone"></i> Listening...';
-            else btn.innerHTML = '<i class="fas fa-microphone"></i> सुन रहा हूँ...';
-            
-            setTimeout(() => {
-                btn.classList.remove('listening');
-                if(AppState.lang === 'en') btn.innerHTML = '<i class="fas fa-check text-brand-600"></i> Voice Captured';
-                else btn.innerHTML = '<i class="fas fa-check text-brand-600"></i> आवाज़ रिकॉर्ड हो गई';
-                
-                document.getElementById('inp-purpose').value = 'micro';
-                document.getElementById('inp-cost').value = '80000';
-            }, 1500);
-        }
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-slate-200 rounded-xl h-[320px] sm:h-[400px] relative overflow-hidden border border-slate-300 shadow-inner">
+          <div class="absolute inset-0" style="background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 30px 30px;"></div>
+          <!-- Route line -->
+          <svg class="absolute inset-0 w-full h-full">
+            <path d="M 150 160 Q 240 120 320 200" stroke="#3b82f6" stroke-width="4" stroke-dasharray="8,8" fill="none" class="opacity-70 animate-pulse"/>
+          </svg>
+          
+          <!-- User Marker -->
+          <div class="absolute top-[140px] left-[130px] flex flex-col items-center">
+            <div class="w-5 h-5 bg-navy-900 rounded-full border-2 border-white shadow-lg relative">
+              <div class="absolute inset-0 bg-navy-900 rounded-full animate-ping opacity-50"></div>
+            </div>
+            <span class="mt-1 bg-white px-2 py-0.5 rounded text-[10px] font-bold shadow text-slate-700">You</span>
+          </div>
 
-        function runRuleEngine() {
-            const cost = parseInt(document.getElementById('inp-cost').value) || 80000;
-            const purpose = document.getElementById('inp-purpose').value;
-            
-            document.getElementById('reco-empty').style.display = 'none';
-            const results = document.getElementById('reco-results');
-            results.classList.remove('hidden');
-            results.style.animation = 'none';
-            results.offsetHeight; // trigger reflow
-            results.style.animation = null;
+          <!-- Target Partner -->
+          <div class="absolute top-[180px] left-[300px] flex flex-col items-center cursor-pointer transform hover:scale-110 transition z-10">
+            <div class="w-10 h-10 bg-brand-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white">
+              <i class="fas fa-building text-sm"></i>
+            </div>
+            <span class="mt-1 bg-white border border-brand-200 px-3 py-1 rounded text-xs font-bold shadow text-brand-700 whitespace-nowrap">UP SC/ST Corp (SCA)</span>
+          </div>
 
-            // Simple Rule Engine Mock
-            if (cost <= 140000 && purpose !== 'edu') {
-                AppState.sharedData = { recommendedScheme: 'micro', projectCost: cost, schemeRate: 6.5, schemeMax: 140000, schemeMora: 3 };
-                document.getElementById('res-title-1').innerText = i18n[AppState.lang].scheme_micro;
-                document.getElementById('res-desc-1').innerText = i18n[AppState.lang].desc_micro;
-                document.getElementById('res-rate').innerText = "6.5%";
-            } else if (cost > 140000 && purpose !== 'edu') {
-                AppState.sharedData = { recommendedScheme: 'term', projectCost: cost, schemeRate: 8.0, schemeMax: 5000000, schemeMora: 6 };
-                document.getElementById('res-title-1').innerText = i18n[AppState.lang].scheme_term;
-                document.getElementById('res-desc-1').innerText = i18n[AppState.lang].desc_term;
-                document.getElementById('res-rate').innerText = "8.0%";
-            }
-        }
+          <!-- Excluded Partner (High NPA) -->
+          <div class="absolute top-[80px] left-[200px] flex flex-col items-center opacity-70">
+            <div class="w-8 h-8 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white">
+              <i class="fas fa-ban text-[10px]"></i>
+            </div>
+            <span class="mt-1 bg-white border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold shadow text-red-600 whitespace-nowrap">NBFC-MFI (Restricted)</span>
+          </div>
+        </div>
 
-        function selectSchemeAndJump(targetTab) {
-            switchTab(targetTab);
-            if(targetTab === 'calculator') {
-                syncFromRecommender();
-            }
-        }
+        <!-- Partner List Panel -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col gap-3 overflow-y-auto max-h-[320px] sm:max-h-[400px]">
+          
+          <div class="border-2 border-brand-500 bg-brand-50 rounded-xl p-4 cursor-pointer relative shadow-sm">
+            <div class="absolute top-0 right-0 bg-brand-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">Routed</div>
+            <h4 class="font-bold text-navy-900 text-sm">UP SC/ST Finance Corp (SCA)</h4>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Gomti Nagar • 2.4 <span data-i18n="dist">km away</span></p>
+            <div class="mt-3 flex gap-2">
+              <span class="bg-white border border-brand-200 text-brand-700 text-[10px] px-2 py-1 rounded font-bold flex items-center"><i class="fas fa-check-circle mr-1"></i> <span data-i18n="tag_good">Sufficient Funds</span></span>
+              <span class="bg-white border border-slate-200 text-slate-600 text-[10px] px-2 py-1 rounded font-bold">NPA: Normal</span>
+            </div>
+          </div>
 
-        // Calculator Logic
-        function syncFromRecommender() {
-            if(!AppState.sharedData.recommendedScheme) return;
-            
-            const sd = AppState.sharedData;
-            document.getElementById('calc-loan').max = sd.schemeMax;
-            document.getElementById('calc-loan').value = Math.min(sd.projectCost, sd.schemeMax);
-            document.getElementById('calc-rate').value = sd.schemeRate;
-            document.getElementById('calc-mora').value = sd.schemeMora;
-            
-            document.getElementById('sync-msg').classList.remove('hidden');
-            setTimeout(() => document.getElementById('sync-msg').classList.add('hidden'), 3000);
-            
-            updateCalcUI();
-        }
+          <div class="border border-slate-200 hover:border-slate-300 rounded-xl p-4 cursor-pointer transition">
+            <h4 class="font-bold text-navy-900 text-sm">Lucknow Regional Rural Bank</h4>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Aliganj Branch • 4.1 <span data-i18n="dist">km away</span></p>
+            <div class="mt-3 flex gap-2">
+              <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded font-bold">Moderate Capacity</span>
+            </div>
+          </div>
 
-        function updateCalcUI() {
-            const p = parseFloat(document.getElementById('calc-loan').value);
-            const m = parseInt(document.getElementById('calc-tenure').value);
-            const mora = parseInt(document.getElementById('calc-mora').value);
-            const r_annual = parseFloat(document.getElementById('calc-rate').value);
+          <div class="border border-red-200 bg-red-50 rounded-xl p-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold text-slate-700 text-sm">City NBFC-MFI Center</h4>
+                <p class="text-xs text-slate-500 mt-1 font-medium">Hazratganj • 1.2 <span data-i18n="dist">km away</span></p>
+              </div>
+              <i class="fas fa-triangle-exclamation text-red-500 mt-1"></i>
+            </div>
+            <div class="mt-3">
+              <span class="bg-red-100 text-red-700 border border-red-200 text-[10px] px-2 py-1 rounded font-bold inline-flex items-center"><i class="fas fa-ban mr-1"></i> <span data-i18n="tag_npa">High NPA (Restricted)</span></span>
+            </div>
+          </div>
 
-            // Update Labels
-            document.getElementById('val-loan').innerText = '₹' + p.toLocaleString('en-IN');
-            document.getElementById('val-tenure').innerText = m;
-            document.getElementById('val-mora').innerText = mora;
-            document.getElementById('val-rate').innerText = r_annual + '%';
+        </div>
+      </div>
+    </div>
+  </section>
 
-            // Math
-            const r_monthly = (r_annual / 12) / 100;
-            const repayMonths = Math.max(1, m - mora);
-            let emi = 0;
-            if (r_monthly > 0) {
-                emi = (p * r_monthly * Math.pow(1 + r_monthly, repayMonths)) / (Math.pow(1 + r_monthly, repayMonths) - 1);
-            } else {
-                emi = p / repayMonths;
-            }
-            
-            const totalRepay = emi * repayMonths;
-            const totalInterest = totalRepay - p;
 
-            // Output
-            document.getElementById('out-emi').innerText = '₹' + Math.round(emi).toLocaleString('en-IN');
-            document.getElementById('out-princ').innerText = '₹' + Math.round(p).toLocaleString('en-IN');
-            document.getElementById('out-int').innerText = '₹' + Math.round(totalInterest).toLocaleString('en-IN');
-            document.getElementById('out-total').innerText = '₹' + Math.round(totalRepay).toLocaleString('en-IN');
-            document.getElementById('out-mora-val').innerText = mora;
-        }
+  <!-- ============ TAB 4: DOCUMENT VERIFICATION ============ -->
+  <section id="tab-docverify" class="tab-content">
+    <div class="glass-panel rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto shadow-md border-t-4 border-t-indigo-500">
+      <div class="flex justify-between items-start mb-6 flex-wrap gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-navy-900" data-i18n="doc_title">Digital Document Verification</h2>
+          <p class="text-slate-500 text-sm mt-1" data-i18n="doc_sub">Retrieve verified e-KYC documents via DigiLocker.</p>
+        </div>
+        <button id="btn-digilocker" onclick="connectDigilocker()" class="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md text-sm flex items-center gap-2 transition">
+          <i class="fas fa-lock"></i> <span id="btn-digilocker-label" data-i18n="doc_connect">Connect DigiLocker</span>
+        </button>
+      </div>
 
-        // Initialize default state
-        setLanguage('en');
-        updateCalcUI();
-    </script>
+      <div id="doc-list" class="space-y-3">
+        <div class="doc-row flex items-center justify-between border border-slate-200 rounded-xl p-4 gap-2 transition-colors" data-doc="pan">
+          <div class="flex items-center gap-3 min-w-0">
+            <i class="fas fa-id-card text-slate-400 text-lg w-6 text-center shrink-0"></i>
+            <span class="font-bold text-slate-700 text-sm truncate" data-i18n="doc_pan">PAN Card</span>
+          </div>
+          <span class="doc-status text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500 shrink-0" data-i18n="doc_status_pending">Not fetched</span>
+        </div>
+        <div class="doc-row flex items-center justify-between border border-slate-200 rounded-xl p-4 gap-2 transition-colors" data-doc="aadhaar">
+          <div class="flex items-center gap-3 min-w-0">
+            <i class="fas fa-fingerprint text-slate-400 text-lg w-6 text-center shrink-0"></i>
+            <span class="font-bold text-slate-700 text-sm truncate" data-i18n="doc_aadhaar">Aadhaar (e-KYC)</span>
+          </div>
+          <span class="doc-status text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500 shrink-0" data-i18n="doc_status_pending">Not fetched</span>
+        </div>
+        <div class="doc-row flex items-center justify-between border border-slate-200 rounded-xl p-4 gap-2 transition-colors" data-doc="caste">
+          <div class="flex items-center gap-3 min-w-0">
+            <i class="fas fa-file-shield text-slate-400 text-lg w-6 text-center shrink-0"></i>
+            <span class="font-bold text-slate-700 text-sm truncate" data-i18n="doc_caste">Caste Certificate</span>
+          </div>
+          <span class="doc-status text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500 shrink-0" data-i18n="doc_status_pending">Not fetched</span>
+        </div>
+        <div class="doc-row flex items-center justify-between border border-slate-200 rounded-xl p-4 gap-2 transition-colors" data-doc="income">
+          <div class="flex items-center gap-3 min-w-0">
+            <i class="fas fa-file-invoice-dollar text-slate-400 text-lg w-6 text-center shrink-0"></i>
+            <span class="font-bold text-slate-700 text-sm truncate" data-i18n="doc_income">Income Certificate</span>
+          </div>
+          <span class="doc-status text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500 shrink-0" data-i18n="doc_status_pending">Not fetched</span>
+        </div>
+      </div>
+
+      <button id="btn-fetch-docs" onclick="fetchDocs()" disabled class="w-full mt-6 bg-slate-200 text-slate-400 font-bold py-3.5 rounded-xl text-sm cursor-not-allowed transition duration-300 shadow-sm">
+        <i class="fas fa-cloud-arrow-down mr-2"></i> <span data-i18n="doc_fetch">Fetch & Verify</span>
+      </button>
+    </div>
+  </section>
+
+
+  <!-- ============ TAB 5: TRACKER ============ -->
+  <section id="tab-tracker" class="tab-content">
+    <div class="glass-panel rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto shadow-md border-t-4 border-t-purple-500">
+      <div class="flex justify-between items-end mb-8 border-b border-slate-200 pb-4 flex-wrap gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-navy-900" data-i18n="trk_title">Application Status</h2>
+          <p class="text-slate-500 text-sm mt-1" data-i18n="trk_sub">Track your loan disbursement stages in real time.</p>
+        </div>
+        <span class="bg-purple-100 text-purple-700 border border-purple-200 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm" data-i18n="st_rev">Under Review</span>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8 flex justify-between items-center flex-wrap gap-2 shadow-sm">
+        <span class="font-mono font-bold text-slate-700 text-sm bg-white px-3 py-1 border border-slate-200 rounded" data-i18n="app_id">App ID: APP-26092</span>
+        <span class="text-sm font-bold text-brand-700">Micro Finance Scheme</span>
+      </div>
+
+      <!-- 4 Stages Timeline matching the PDF -->
+      <div class="relative pl-6 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+        
+        <!-- Stage 1: Submitted -->
+        <div class="relative">
+          <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-brand-500 border-4 border-white flex items-center justify-center shadow"></div>
+          <h4 class="font-bold text-slate-800 text-base" data-i18n="ts_sub">Submitted</h4>
+          <p class="text-sm text-slate-500 mt-1" data-i18n="ts_sub_desc">Paperless submission via DigiLocker.</p>
+        </div>
+        
+        <!-- Stage 2: Under Review -->
+        <div class="relative">
+          <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-purple-500 border-4 border-white shadow flex items-center justify-center">
+            <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
+          </div>
+          <h4 class="font-bold text-purple-700 text-base" data-i18n="ts_rev">Under Review</h4>
+          <p class="text-sm text-slate-500 mt-1" data-i18n="ts_rev_desc">SCA verifying project feasibility.</p>
+          <span class="inline-block mt-2 bg-purple-50 text-purple-700 border border-purple-100 text-xs font-bold px-2.5 py-1 rounded shadow-sm">Est. 2-3 Days</span>
+        </div>
+        
+        <!-- Stage 3: Sanctioned -->
+        <div class="relative opacity-40">
+          <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-slate-300 border-4 border-white"></div>
+          <h4 class="font-bold text-slate-800 text-base" data-i18n="ts_sanc">Sanctioned</h4>
+          <p class="text-sm text-slate-500 mt-1" data-i18n="ts_sanc_desc">Loan approved by channel partner.</p>
+        </div>
+        
+        <!-- Stage 4: Disbursed -->
+        <div class="relative opacity-40">
+          <div class="absolute -left-[33px] top-0 w-6 h-6 rounded-full bg-slate-300 border-4 border-white"></div>
+          <h4 class="font-bold text-slate-800 text-base" data-i18n="ts_disb">Disbursed</h4>
+          <p class="text-sm text-slate-500 mt-1" data-i18n="ts_disb_desc">DBT transfer to beneficiary account.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ---------- Tab navigation ----------
+function switchTab(tabId){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.classList.remove('bg-slate-700','text-white','border-brand-500','border-saffron-400','border-blue-400','border-indigo-400','border-purple-400');
+    btn.classList.add('text-slate-400','border-transparent');
+  });
+  const activeBtn = document.getElementById(`nav-${tabId}`);
+  activeBtn.classList.remove('text-slate-400','border-transparent');
+  activeBtn.classList.add('bg-slate-700','text-white');
+  if(tabId==='recommender') activeBtn.classList.add('border-brand-500');
+  if(tabId==='calculator') activeBtn.classList.add('border-saffron-400');
+  if(tabId==='locator') activeBtn.classList.add('border-blue-400');
+  if(tabId==='docverify') activeBtn.classList.add('border-indigo-400');
+  if(tabId==='tracker') activeBtn.classList.add('border-purple-400');
+  if(tabId==='calculator' && AppState.sharedData.recommendedScheme) {
+    document.getElementById('btn-sync').classList.remove('hidden');
+  }
+}
+
+// ---------- Assistant Layout Toggle ----------
+function expandAssistant() {
+  document.getElementById('assistant-collapsed').classList.add('hidden');
+  document.getElementById('assistant-expanded').classList.remove('hidden');
+  
+  // Seed greeting if empty
+  if (document.getElementById('chat-window').children.length === 0) {
+    appendChat('bot', i18n[AppState.lang].seed_bot);
+    AppState.chatState = 0; // State 0: Asked Purpose
+    updateQuickReplies();
+  }
+}
+
+function collapseAssistant() {
+  document.getElementById('assistant-expanded').classList.add('hidden');
+  document.getElementById('assistant-collapsed').classList.remove('hidden');
+}
+
+// ---------- Chat Core ----------
+function appendChat(role, text){
+  const win = document.getElementById('chat-window');
+  const row = document.createElement('div');
+  row.className = role==='user' ? 'flex justify-end animation-fade-in' : 'flex justify-start animation-fade-in';
+  const bubble = document.createElement('div');
+  bubble.className = role==='user'
+    ? 'max-w-[80%] bg-navy-900 text-white text-sm rounded-2xl rounded-br-sm px-4 py-3 shadow'
+    : 'max-w-[80%] bg-white border border-slate-200 text-slate-700 text-sm rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm';
+  bubble.innerHTML = text;
+  row.appendChild(bubble);
+  win.appendChild(row);
+  win.scrollTop = win.scrollHeight;
+  return row;
+}
+
+function showTyping(){
+  const win = document.getElementById('chat-window');
+  const row = document.createElement('div');
+  row.className = 'flex justify-start';
+  row.id = 'typing-row';
+  row.innerHTML = `<div class="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm flex gap-1 items-center h-[44px]">
+    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full dot"></span>
+    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full dot"></span>
+    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full dot"></span>
+  </div>`;
+  win.appendChild(row);
+  win.scrollTop = win.scrollHeight;
+}
+
+function hideTyping(){
+  const row = document.getElementById('typing-row');
+  if(row) row.remove();
+}
+
+function updateQuickReplies() {
+  const container = document.getElementById('quick-replies');
+  container.innerHTML = '';
+  
+  let options = [];
+  if (AppState.chatState === 0) options = Suggestions.purpose[AppState.lang];
+  else if (AppState.chatState === 1) options = Suggestions.cost[AppState.lang];
+  else if (AppState.chatState === 2) options = Suggestions.income[AppState.lang];
+  
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-chip text-xs font-semibold bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-full hover:border-brand-500 hover:text-brand-700 transition shadow-sm';
+    btn.innerText = opt;
+    btn.onclick = () => { document.getElementById('chat-input').value = opt; sendChatText(); };
+    container.appendChild(btn);
+  });
+}
+
+function extractNumber(text) {
+  const lakhsMatch = text.match(/(\d+(\.\d+)?)\s*lakh/i);
+  if (lakhsMatch) return Math.round(parseFloat(lakhsMatch[1]) * 100000);
+  
+  const nums = text.replace(/,/g,'').match(/\d+/g);
+  if (nums) return parseInt(nums[0], 10);
+  return null;
+}
+
+// Smart NLP Processor
+function processUserMessage(text) {
+  const t = text.toLowerCase();
+  
+  // Try to find everything in one go (Voice flow)
+  let foundPurpose = false;
+  if(/tailor|kirana|shop|dukaan|टेलरिंग|दुकान|business|micro/.test(t)) { AppState.currentApp.purpose = 'micro'; foundPurpose = true; }
+  else if(/education|course|college|study|शिक्षा|पढ़ाई/.test(t)) { AppState.currentApp.purpose = 'edu'; foundPurpose = true; }
+  else if(/manufactur|factory|plant|unit/.test(t)) { AppState.currentApp.purpose = 'term'; foundPurpose = true; }
+
+  // Extract all numbers to see if both cost and income are provided
+  let nums = [];
+  const lakhMatches = t.match(/(\d+(\.\d+)?)\s*lakh/gi);
+  if (lakhMatches) {
+    lakhMatches.forEach(m => {
+      const val = m.match(/(\d+(\.\d+)?)/)[0];
+      nums.push(Math.round(parseFloat(val) * 100000));
+    });
+  } else {
+    const rawNums = t.replace(/,/g,'').match(/\d{4,}/g);
+    if(rawNums) nums = rawNums.map(n=>parseInt(n));
+  }
+
+  // If one go detected everything
+  if (foundPurpose && nums.length >= 2) {
+    AppState.currentApp.cost = Math.min(...nums);
+    AppState.currentApp.income = Math.max(...nums);
+    AppState.chatState = 3; // Done
+    return finalizeResult();
+  }
+
+  // Otherwise, Step-by-Step Logic based on current state
+  let reply = '';
+  if (AppState.chatState === 0) {
+    if(!foundPurpose) AppState.currentApp.purpose = 'micro'; // default fallback
+    
+    reply = AppState.lang === 'en' 
+      ? "Got it! How much estimated funding do you need for this project in rupees?" 
+      : "समझ गया! इस प्रोजेक्ट के लिए आपको लगभग कितने रुपयों की आवश्यकता है?";
+    AppState.chatState = 1;
+    updateQuickReplies();
+  } 
+  else if (AppState.chatState === 1) {
+    AppState.currentApp.cost = extractNumber(text) || 80000;
+    
+    reply = AppState.lang === 'en'
+      ? `Noted (₹${AppState.currentApp.cost.toLocaleString('en-IN')}). Finally, what is your total annual family income?`
+      : `नोट कर लिया (₹${AppState.currentApp.cost.toLocaleString('en-IN')})। आपके परिवार की कुल वार्षिक आय कितनी है?`;
+    AppState.chatState = 2;
+    updateQuickReplies();
+  }
+  else if (AppState.chatState === 2) {
+    AppState.currentApp.income = extractNumber(text) || 200000;
+    AppState.chatState = 3; // Done
+    document.getElementById('quick-replies').innerHTML = '';
+    return finalizeResult();
+  } 
+  else {
+    reply = AppState.lang === 'en' 
+      ? "You can click 'Calculate EMI' or 'Route to Partner' on the right panel to proceed." 
+      : "आगे बढ़ने के लिए आप दाईं ओर 'EMI कैलकुलेट करें' या 'पार्टनर खोजें' पर क्लिक कर सकते हैं।";
+  }
+  
+  return reply;
+}
+
+function finalizeResult() {
+  runRuleEngine();
+  const schemeKey = AppState.sharedData.recommendedScheme;
+  const schemeName = i18n[AppState.lang][ schemeKey==='micro' ? 'scheme_micro' : schemeKey==='term' ? 'scheme_term' : 'scheme_edu' ];
+  
+  const reply = AppState.lang === 'en'
+    ? `Thank you! Based on your parameters, I have matched you with the <b>${schemeName}</b>. I've mapped your official eligibility card on the right.`
+    : `धन्यवाद! आपके विवरण के आधार पर, मैंने आपके लिए <b>${schemeName}</b> का चयन किया है। आधिकारिक पात्रता कार्ड दाईं ओर तैयार है।`;
+  
+  showResultPanel();
+  return reply;
+}
+
+function sendChatText(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  appendChat('user', text);
+  input.value = '';
+  document.getElementById('quick-replies').innerHTML = ''; // Clear suggestions immediately
+  
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    const botReply = processUserMessage(text);
+    appendChat('bot', botReply);
+  }, 800 + Math.random()*500);
+}
+
+// Flow for Manual form submission -> jump to chat & show results
+function submitManualForm() {
+  const p = document.getElementById('inp-purpose').value;
+  const c = parseInt(document.getElementById('inp-cost').value) || 80000;
+  const i = parseInt(document.getElementById('inp-income').value) || 200000;
+  
+  AppState.currentApp.purpose = p;
+  AppState.currentApp.cost = c;
+  AppState.currentApp.income = i;
+  AppState.chatState = 3; // Skip straight to done
+  
+  expandAssistant();
+  
+  // Clear chat window & mock the system evaluating
+  document.getElementById('chat-window').innerHTML = '';
+  document.getElementById('quick-replies').innerHTML = '';
+  
+  appendChat('user', `Purpose: ${p}, Cost: ₹${c.toLocaleString()}, Income: ₹${i.toLocaleString()}`);
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    const reply = finalizeResult();
+    appendChat('bot', reply);
+  }, 800);
+}
+
+// Flow for Voice "In one go" Mock
+function triggerVoiceFlow() {
+  expandAssistant();
+  
+  const orbInline = document.getElementById('btn-voice-inline');
+  const status = document.getElementById('mic-status');
+  if(orbInline) orbInline.classList.add('listening');
+  status.setAttribute('data-i18n','mic_listen');
+  status.innerHTML = i18n[AppState.lang].mic_listen || "Listening...";
+  document.getElementById('quick-replies').innerHTML = '';
+
+  setTimeout(()=>{
+    if(orbInline) orbInline.classList.remove('listening');
+    status.setAttribute('data-i18n','mic_done');
+    status.innerHTML = i18n[AppState.lang].mic_done || "Captured";
+
+    // Simulate full sentence
+    const voiceText = AppState.lang==='en' 
+      ? "I need 80,000 rupees for a tailoring shop, and my family income is 2 lakhs." 
+      : "मुझे टेलरिंग की दुकान के लिए 80 हज़ार रुपये चाहिए, मेरी पारिवारिक आय 2 लाख है।";
+
+    appendChat('user', voiceText);
+    showTyping();
+
+    setTimeout(() => {
+      hideTyping();
+      const botReply = processUserMessage(voiceText); // This will parse all 3 things and return finalizeResult()
+      appendChat('bot', botReply);
+      
+      status.setAttribute('data-i18n','mic_idle');
+      status.innerHTML = i18n[AppState.lang].mic_idle;
+    }, 1000);
+
+  }, 2200);
+}
+
+// Transforms Layout
+function showResultPanel() {
+  const chatCol = document.getElementById('chat-col');
+  const resultCol = document.getElementById('result-col');
+  
+  // Shrink chat, show results
+  chatCol.classList.remove('lg:col-span-12');
+  chatCol.classList.add('lg:col-span-7');
+  
+  setTimeout(()=>{
+    resultCol.classList.add('visible');
+  }, 200);
+}
+
+// ---------- Scheme Recommender Rule Engine ----------
+function runRuleEngine(){
+  const cost = AppState.currentApp.cost || 80000;
+  const purpose = AppState.currentApp.purpose || 'micro';
+
+  let titleKey, descKey, rate, mora;
+
+  // Rules from SIH PPT reference
+  if(purpose === 'edu'){
+    AppState.sharedData = {recommendedScheme:'edu', projectCost:cost, schemeRate:6.0, schemeMax:2000000, schemeMora:6};
+    titleKey='scheme_edu'; descKey='desc_edu'; rate='6.0'; mora='6';
+  } else if(cost <= 140000){ // Micro limit from PDF
+    AppState.sharedData = {recommendedScheme:'micro', projectCost:cost, schemeRate:6.5, schemeMax:140000, schemeMora:3};
+    titleKey='scheme_micro'; descKey='desc_micro'; rate='6.5'; mora='3';
+  } else { // Term Loan limit up to 50L
+    AppState.sharedData = {recommendedScheme:'term', projectCost:cost, schemeRate:8.0, schemeMax:5000000, schemeMora:6};
+    titleKey='scheme_term'; descKey='desc_term'; rate='8.0'; mora='6';
+  }
+
+  setResultCard('res-title', 'res-desc', 'res-rate', 'res-mora', titleKey, descKey, rate, mora);
+  setLanguage(AppState.lang);
+}
+
+function setResultCard(titleId, descId, rateId, moraId, titleKey, descKey, rate, mora){
+  const t = document.getElementById(titleId);
+  const d = document.getElementById(descId);
+  t.setAttribute('data-i18n', titleKey);
+  d.setAttribute('data-i18n', descKey);
+  t.innerHTML = i18n[AppState.lang][titleKey];
+  d.innerHTML = i18n[AppState.lang][descKey];
+  document.getElementById(rateId).innerText = rate + '%';
+  document.getElementById(moraId).innerText = mora;
+}
+
+function selectSchemeAndJump(targetTab){
+  switchTab(targetTab);
+  if(targetTab === 'calculator') syncFromRecommender();
+}
+
+// ---------- Calculator UI Logic ----------
+function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+function onLoanSliderInput(){ const v = document.getElementById('calc-loan').value; document.getElementById('calc-loan-num').value = v; updateCalcUI(); }
+function onLoanNumberInput(){ const s = document.getElementById('calc-loan'); let v = parseInt(document.getElementById('calc-loan-num').value)||0; v = clamp(v, parseInt(s.min), parseInt(s.max)); s.value = v; updateCalcUI(); }
+function onTenureSliderInput(){ const v = document.getElementById('calc-tenure').value; document.getElementById('calc-tenure-num').value = v; updateCalcUI(); }
+function onTenureNumberInput(){ const s = document.getElementById('calc-tenure'); let v = parseInt(document.getElementById('calc-tenure-num').value)||12; v = clamp(v, parseInt(s.min), parseInt(s.max)); s.value = v; updateCalcUI(); }
+function onMoraSliderInput(){ const v = document.getElementById('calc-mora').value; document.getElementById('calc-mora-num').value = v; updateCalcUI(); }
+function onMoraNumberInput(){ const s = document.getElementById('calc-mora'); let v = parseInt(document.getElementById('calc-mora-num').value)||0; v = clamp(v, parseInt(s.min), parseInt(s.max)); s.value = v; updateCalcUI(); }
+function onRateSliderInput(){ const v = document.getElementById('calc-rate').value; document.getElementById('calc-rate-num').value = v; updateCalcUI(); }
+function onRateNumberInput(){ const s = document.getElementById('calc-rate'); let v = parseFloat(document.getElementById('calc-rate-num').value)||6.0; v = clamp(v, parseFloat(s.min), parseFloat(s.max)); s.value = v; updateCalcUI(); }
+
+function syncFromRecommender(){
+  if(!AppState.sharedData.recommendedScheme) return;
+  const sd = AppState.sharedData;
+  const loanSlider = document.getElementById('calc-loan');
+  loanSlider.max = sd.schemeMax;
+  const loanVal = Math.min(sd.projectCost, sd.schemeMax);
+  loanSlider.value = loanVal;
+  document.getElementById('calc-loan-num').max = sd.schemeMax;
+  document.getElementById('calc-loan-num').value = loanVal;
+  
+  document.getElementById('calc-rate').value = sd.schemeRate;
+  document.getElementById('calc-rate-num').value = sd.schemeRate;
+  document.getElementById('calc-mora').value = sd.schemeMora;
+  document.getElementById('calc-mora-num').value = sd.schemeMora;
+
+  document.getElementById('sync-msg').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('sync-msg').classList.add('hidden'), 3000);
+  updateCalcUI();
+}
+
+function updateCalcUI(){
+  const p = parseFloat(document.getElementById('calc-loan').value);
+  const m = parseInt(document.getElementById('calc-tenure').value);
+  const mora = parseInt(document.getElementById('calc-mora').value);
+  const r_annual = parseFloat(document.getElementById('calc-rate').value);
+
+  const r_monthly = (r_annual/12)/100;
+  const repayMonths = Math.max(1, m - mora);
+  let emi = 0;
+  if(r_monthly > 0) emi = (p * r_monthly * Math.pow(1+r_monthly, repayMonths)) / (Math.pow(1+r_monthly, repayMonths) - 1);
+  else emi = p / repayMonths;
+  
+  const totalRepay = emi * repayMonths;
+  const totalInterest = totalRepay - p;
+
+  document.getElementById('out-emi').innerText = '₹' + Math.round(emi).toLocaleString('en-IN');
+  document.getElementById('out-princ').innerText = '₹' + Math.round(p).toLocaleString('en-IN');
+  document.getElementById('out-int').innerText = '₹' + Math.round(totalInterest).toLocaleString('en-IN');
+  document.getElementById('out-total').innerText = '₹' + Math.round(totalRepay).toLocaleString('en-IN');
+  document.getElementById('out-mora-val').innerText = mora;
+}
+
+// ---------- Document Verification ----------
+let digilockerConnected = false;
+function connectDigilocker(){
+  if(digilockerConnected) return;
+  const btn = document.getElementById('btn-digilocker');
+  const label = document.getElementById('btn-digilocker-label');
+  btn.disabled = true;
+  label.innerText = AppState.lang==='en' ? 'Connecting…' : 'कनेक्ट हो रहा है…';
+  
+  setTimeout(()=>{
+    digilockerConnected = true;
+    btn.classList.remove('bg-indigo-600','hover:bg-indigo-700');
+    btn.classList.add('bg-brand-600');
+    btn.disabled = false;
+    label.setAttribute('data-i18n','doc_connected');
+    label.innerText = i18n[AppState.lang].doc_connected;
+    
+    const fetchBtn = document.getElementById('btn-fetch-docs');
+    fetchBtn.disabled = false;
+    fetchBtn.classList.remove('bg-slate-200','text-slate-400','cursor-not-allowed');
+    fetchBtn.classList.add('bg-indigo-600','hover:bg-indigo-700','text-white','cursor-pointer', 'shadow-md');
+  }, 1200);
+}
+
+function fetchDocs(){
+  if(!digilockerConnected) return;
+  const rows = document.querySelectorAll('.doc-row');
+  document.getElementById('btn-fetch-docs').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying securely...';
+  
+  rows.forEach((row, i)=>{
+    setTimeout(()=>{
+      const statusEl = row.querySelector('.doc-status');
+      statusEl.classList.remove('bg-slate-100','text-slate-500');
+      statusEl.classList.add('bg-brand-100','text-brand-700');
+      statusEl.setAttribute('data-i18n','doc_status_done');
+      statusEl.innerHTML = '<i class="fas fa-check-circle mr-1"></i>' + i18n[AppState.lang].doc_status_done;
+      row.classList.add('border-brand-200', 'bg-brand-50');
+      
+      if (i === rows.length - 1) {
+        document.getElementById('btn-fetch-docs').innerHTML = '<i class="fas fa-check mr-2"></i> Fetched & Verified';
+        document.getElementById('btn-fetch-docs').classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        document.getElementById('btn-fetch-docs').classList.add('bg-brand-600');
+      }
+    }, (i + 1) * 600);
+  });
+}
+
+// ---------- Init ----------
+setLanguage('en');
+updateCalcUI();
+</script>
 </body>
 </html>
